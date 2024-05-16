@@ -86,5 +86,5 @@ type ChatSend struct {
 // 房间信息
 type RoomInfo struct {
 	Id    int
-	state int // 0: 匹配中  1: 游戏中
+	State int // 0: 匹配中  1: 游戏中
 }
