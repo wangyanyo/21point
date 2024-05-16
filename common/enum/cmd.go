@@ -25,3 +25,8 @@ const (
 const (
 	SYS_TYPE = runtime.GOOS
 )
+
+var StateMap = map[int]string{
+	0: "未开始",
+	1: "游戏中",
+}
