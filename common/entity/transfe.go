@@ -92,6 +92,7 @@ type RoomInfo struct {
 
 // 玩家分数信息
 type UserScoreInfo struct {
+	rank  int
 	Name  string
 	Score int
 }

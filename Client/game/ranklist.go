@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/wangyanyo/21point/Client/models"
@@ -31,7 +32,7 @@ func RankList(c *models.TcpClient) error {
 		rankList := <-c.CmdChan
 		if rankList.Cmd == enum.RankListPactet {
 			for i, v := range rankList.Data.([]entity.UserScoreInfo) {
-				fmt.Println(cnt+i+1, "\t\t", v.Name, "\t\t", v.Score)
+				fmt.Println(strconv.Itoa(cnt+i) + "\t\t" + v.Name + "\t\t" + strconv.Itoa(v.Score))
 			}
 		} else {
 			log.Println("获取排行榜错误")
