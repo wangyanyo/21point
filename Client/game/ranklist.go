@@ -37,7 +37,7 @@ func RankList(c *models.TcpClient) error {
 			log.Println("获取排行榜错误")
 			fmt.Println("获取排行榜错误！")
 			time.Sleep(1 * time.Second)
-			return &myerror.RankListError{}
+			return myerror.New("RankListError")
 		}
 		fmt.Print(view.RankListViewTail)
 		fmt.Print("请输入: ")
@@ -69,7 +69,7 @@ func RankList(c *models.TcpClient) error {
 				log.Println("获取玩家人数错误")
 				fmt.Println("获取玩家人数错误！")
 				time.Sleep(1 * time.Second)
-				return &myerror.UserCountError{}
+				return myerror.New("UserCountError")
 			}
 			if cnt+10 > num {
 				fmt.Println("这是最后一页！")

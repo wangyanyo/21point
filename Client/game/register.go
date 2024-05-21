@@ -50,7 +50,7 @@ func Register(c *models.TcpClient) error {
 			log.Println("用户名已存在", username, password)
 			fmt.Println("用户名已存在")
 			time.Sleep(1 * time.Second)
-			return &myerror.RepeatUsernameError{}
+			return myerror.New("RepeatUsernameError")
 		}
 	}
 	return nil

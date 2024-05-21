@@ -32,7 +32,7 @@ func Game(c *models.TcpClient) error {
 		if myScore.Cmd == enum.GetScorePaket {
 			fmt.Println(myScore.Data.(int))
 		} else {
-			return &myerror.GetScoreError{}
+			return myerror.New("GetScoreError")
 		}
 		fmt.Print("请输入: ")
 		scanner := bufio.NewScanner(os.Stdin)

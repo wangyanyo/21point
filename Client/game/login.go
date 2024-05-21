@@ -50,12 +50,12 @@ func Login(c *models.TcpClient) error {
 			log.Println("用户名或密码错误")
 			fmt.Println("用户名或密码错误！")
 			time.Sleep(1 * time.Second)
-			return &myerror.PasswordWrongError{}
+			return myerror.New("PassWordWrongError")
 		} else {
 			log.Println("用户名不存在")
 			fmt.Println("用户名不存在！")
 			time.Sleep(1 * time.Second)
-			return &myerror.NoUserNameError{}
+			return myerror.New("NoUserNameError")
 		}
 	}
 	return nil
