@@ -17,7 +17,7 @@ import (
 
 func Register(c *models.TcpClient) error {
 	utils.Cle()
-	fmt.Println(view.RegisterView)
+	fmt.Print(view.RegisterView)
 	scanner := bufio.NewScanner(os.Stdin)
 	fmt.Print("请输入用户名：")
 	scanner.Scan()
@@ -31,6 +31,7 @@ func Register(c *models.TcpClient) error {
 		Password: password,
 	}
 	if _, err := c.Send(entity.NewTransfeData(enum.RegisterPacket, "", userData)); err != nil {
+		models.Rconn <- true
 		log.Println("断线重连", err)
 		fmt.Println("连接已断开，正在尝试重连...")
 		time.Sleep(1 * time.Second)
@@ -39,7 +40,8 @@ func Register(c *models.TcpClient) error {
 	isRegister := <-c.CmdChan
 	log.Println("isReister = ", isRegister)
 	if isRegister.Cmd == enum.RegisterPacket {
-		if isRegister.Data.(bool) == true {
+		if isRegister.Data.(bool) {
+			c.Token = isRegister.Token
 			log.Println("注册成功", username, password)
 			fmt.Println("注册成功！")
 			time.Sleep(1 * time.Second)

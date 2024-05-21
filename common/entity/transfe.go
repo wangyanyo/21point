@@ -14,6 +14,7 @@ func init() {
 	gob.Register(ChatData{})
 	gob.Register(ChatSend{})
 	gob.Register(RoomInfo{})
+	gob.Register(UserScoreInfo{})
 }
 
 // 任何类型都可以实现空接口，因此可以用空接口代表任何一个类型，类似所有类型的基类
@@ -87,4 +88,10 @@ type ChatSend struct {
 type RoomInfo struct {
 	Id    int
 	State int // 0: 匹配中  1: 游戏中
+}
+
+// 玩家分数信息
+type UserScoreInfo struct {
+	Name  string
+	Score int
 }

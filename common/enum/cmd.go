@@ -8,7 +8,9 @@ const (
 	HeartPacket     Command = "Heart_Packet"     //心跳
 	LoginPacket     Command = "Login_Packet"     //登录
 	RegisterPacket  Command = "Register_Packet"  //注册
+	GetScorePaket   Command = "GetScore_Packet"  //获取分数
 	RankListPactet  Command = "RankList_Packet"  //查看积分排行榜
+	UserCountPacket Command = "UserCount_Packet" //玩家数量
 	MatchPacket     Command = "Match_Packet"     //匹配
 	MatchOffPacket  Command = "MatchOff_Packet"  //取消匹配
 	AskCardsPactet  Command = "AskCards_Pactet"  //要牌
