@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"time"
 
 	"github.com/wangyanyo/21point/Client/models"
 	"github.com/wangyanyo/21point/Client/view"
@@ -20,20 +19,18 @@ func Game(c *models.TcpClient) error {
 		utils.Cle()
 		fmt.Print(view.GameView)
 		fmt.Print("你的分数: ")
-		if _, err := c.Send(entity.NewTransfeData(enum.GetScorePaket, c.Token, 0)); err != nil {
-			models.Rconn <- true
-			log.Println("断线重连", err)
-			fmt.Println("连接已断开，正在尝试重连...")
-			time.Sleep(1 * time.Second)
+		if _, err := c.Send(entity.NewTransfeData(enum.GetScorePacket, c.Token, 0)); err != nil {
+			myerror.Reconnect(err)
 			return err
 		}
+
 		myScore := <-c.CmdChan
 		log.Println("请求分数", myScore)
-		if myScore.Cmd == enum.GetScorePaket {
-			fmt.Println(myScore.Data.(int))
-		} else {
-			return myerror.New("GetScoreError")
+		if err := myerror.CheckPacket(myScore, enum.GetScorePacket); err != nil {
+			continue
 		}
+		fmt.Println(myScore.Data.(int))
+
 		fmt.Print("请输入: ")
 		scanner := bufio.NewScanner(os.Stdin)
 		scanner.Scan()
@@ -48,9 +45,7 @@ func Game(c *models.TcpClient) error {
 			continue
 		}
 		if text == "2" {
-			log.Println("退出游戏界面", c.Token)
-			fmt.Println("退出成功！")
-			time.Sleep(1 * time.Second)
+			utils.PrintMessage("退出游戏界面成功！")
 			return nil
 		}
 	}

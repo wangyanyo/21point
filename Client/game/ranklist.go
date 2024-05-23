@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 	"strconv"
-	"time"
 
 	"github.com/wangyanyo/21point/Client/models"
 	"github.com/wangyanyo/21point/Client/view"
@@ -23,22 +22,16 @@ func RankList(c *models.TcpClient) error {
 		log.Println("查看排行榜", cnt)
 		fmt.Print(view.RankListViewHead)
 		if _, err := c.Send(entity.NewTransfeData(enum.RankListPactet, "", cnt)); err != nil {
-			models.Rconn <- true
-			log.Println("断线重连", err)
-			fmt.Println("连接已断开，正在尝试重连...")
-			time.Sleep(1 * time.Second)
+			myerror.Reconnect(err)
 			return err
 		}
 		rankList := <-c.CmdChan
-		if rankList.Cmd == enum.RankListPactet {
-			for i, v := range rankList.Data.([]entity.UserScoreInfo) {
-				fmt.Println(strconv.Itoa(cnt+i) + "\t\t" + v.Name + "\t\t" + strconv.Itoa(v.Score))
-			}
-		} else {
-			log.Println("获取排行榜错误")
-			fmt.Println("获取排行榜错误！")
-			time.Sleep(1 * time.Second)
-			return myerror.New("RankListError")
+		if err := myerror.CheckPacket(rankList, enum.RankListPactet); err != nil {
+			return err
+		}
+
+		for i, v := range rankList.Data.([]entity.UserScoreInfo) {
+			fmt.Println(strconv.Itoa(cnt+i) + "\t\t" + v.Name + "\t\t" + strconv.Itoa(v.Score))
 		}
 		fmt.Print(view.RankListViewTail)
 		fmt.Print("请输入: ")
@@ -47,8 +40,7 @@ func RankList(c *models.TcpClient) error {
 		text := scanner.Text()
 		if text == "0" {
 			if cnt == 1 {
-				fmt.Println("这是第一页！")
-				time.Sleep(1 * time.Second)
+				utils.PrintMessage("这是第一页！")
 				continue
 			}
 			cnt = max(1, cnt-10)
@@ -56,25 +48,17 @@ func RankList(c *models.TcpClient) error {
 		}
 		if text == "1" {
 			if _, err := c.Send(entity.NewTransfeData(enum.UserCountPacket, "", 0)); err != nil {
-				models.Rconn <- true
-				log.Println("断线重连", err)
-				fmt.Println("连接已断开，正在尝试重连...")
-				time.Sleep(1 * time.Second)
+				myerror.Reconnect(err)
 				return err
 			}
 			userCount := <-c.CmdChan
-			var num int
-			if userCount.Cmd == enum.UserCountPacket {
-				num = userCount.Data.(int)
-			} else {
-				log.Println("获取玩家人数错误")
-				fmt.Println("获取玩家人数错误！")
-				time.Sleep(1 * time.Second)
-				return myerror.New("UserCountError")
+			if err := myerror.CheckPacket(userCount, enum.UserCountPacket); err != nil {
+				continue
 			}
+			num := userCount.Data.(int)
+
 			if cnt+10 > num {
-				fmt.Println("这是最后一页！")
-				time.Sleep(1 * time.Second)
+				utils.PrintMessage("这是最后一页！")
 				continue
 			}
 			cnt = min(num, cnt+10)
@@ -87,9 +71,7 @@ func RankList(c *models.TcpClient) error {
 			continue
 		}
 		if text == "3" {
-			log.Println("退出排行榜")
-			fmt.Println("退出成功！")
-			time.Sleep(1 * time.Second)
+			utils.PrintMessage("退出排行榜成功！")
 			return nil
 		}
 	}

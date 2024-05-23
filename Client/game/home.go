@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"time"
 
 	"github.com/wangyanyo/21point/Client/models"
 	"github.com/wangyanyo/21point/Client/view"
@@ -38,8 +37,7 @@ func Home(c *models.TcpClient) error {
 			continue
 		}
 		if text == "2" {
-			fmt.Println("退出成功")
-			time.Sleep(1 * time.Second)
+			utils.PrintMessage("退出游戏成功！")
 			return nil
 		}
 	}

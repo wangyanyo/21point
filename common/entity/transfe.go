@@ -18,6 +18,7 @@ func init() {
 }
 
 // 任何类型都可以实现空接口，因此可以用空接口代表任何一个类型，类似所有类型的基类
+// Code返回是否有异常，Data返回想要的结果，当然也要具体情况具体分析
 type TransfeData struct {
 	Cmd       enum.Command //指令
 	Timestamp int64
@@ -92,7 +93,7 @@ type RoomInfo struct {
 
 // 玩家分数信息
 type UserScoreInfo struct {
-	rank  int
+	Rank  int
 	Name  string
 	Score int
 }

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"time"
 
 	"github.com/wangyanyo/21point/Client/models"
 	"github.com/wangyanyo/21point/Client/view"
@@ -31,27 +30,15 @@ func Register(c *models.TcpClient) error {
 		Password: password,
 	}
 	if _, err := c.Send(entity.NewTransfeData(enum.RegisterPacket, "", userData)); err != nil {
-		models.Rconn <- true
-		log.Println("断线重连", err)
-		fmt.Println("连接已断开，正在尝试重连...")
-		time.Sleep(1 * time.Second)
+		myerror.Reconnect(err)
 		return err
 	}
 	isRegister := <-c.CmdChan
 	log.Println("isReister = ", isRegister)
-	if isRegister.Cmd == enum.RegisterPacket {
-		if isRegister.Data.(bool) {
-			c.Token = isRegister.Token
-			log.Println("注册成功", username, password)
-			fmt.Println("注册成功！")
-			time.Sleep(1 * time.Second)
-			return nil
-		} else {
-			log.Println("用户名已存在", username, password)
-			fmt.Println("用户名已存在")
-			time.Sleep(1 * time.Second)
-			return myerror.New("RepeatUsernameError")
-		}
+	if err := myerror.CheckPacket(isRegister, enum.RegisterPacket, "用户名已存在，注册失败"); err != nil {
+		return err
 	}
+	c.Token = isRegister.Token
+	utils.PrintMessage("注册成功！")
 	return nil
 }
