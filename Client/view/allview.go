@@ -35,3 +35,7 @@ rank 		username		score
 var SearchViewTail = `
 操作：0 输入用户名  1 退出
 `
+
+var MatchView = `
+正在为你匹配对手......
+`

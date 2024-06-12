@@ -48,15 +48,12 @@ func Search(c *models.TcpClient) error {
 					flag = true
 				} else {
 					flag = false
-					log.Println("没有该用户")
-					fmt.Println("用户不存在！")
+					utils.PrintMessage("用户不存在！")
 					time.Sleep(1 * time.Second)
 					continue
 				}
-
 			} else {
-				log.Println("查找用户错误")
-				fmt.Println("查找用户错误！")
+				utils.PrintMessage("查找用户错误")
 				time.Sleep(1 * time.Second)
 				return myerror.New("SearchError")
 			}

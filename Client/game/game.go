@@ -36,7 +36,10 @@ func Game(c *models.TcpClient) error {
 		scanner.Scan()
 		text := scanner.Text()
 		if text == "0" {
-
+			if err := Match(c); err != nil {
+				continue
+			}
+			continue
 		}
 		if text == "1" {
 			if err := RankList(c); err != nil {
