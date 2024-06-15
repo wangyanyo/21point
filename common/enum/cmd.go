@@ -14,6 +14,7 @@ const (
 	UserCountPacket Command = "UserCount_Packet" //玩家数量
 	MatchPacket     Command = "Match_Packet"     //匹配
 	MatchOffPacket  Command = "MatchOff_Packet"  //取消匹配
+	EnterRoomPacket Command = "EnterRoom_Packet" //进入房间
 	AskCardsPactet  Command = "AskCards_Pactet"  //要牌
 	StopCardsPactet Command = "StopCards_Pactet" //停牌
 	ChatPacket      Command = "Chat_Packet"      //聊天

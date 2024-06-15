@@ -29,24 +29,20 @@ func Login(c *models.TcpClient) error {
 		Name:     username,
 		Password: password,
 	}
-	if _, err := c.Send(entity.NewTransfeData(enum.LoginPacket, "", userData)); err != nil {
-		myerror.Reconnect(err)
+	loginInfo, err := utils.RAL(c, enum.LoginPacket, "", userData)
+	if err != nil {
 		return err
 	}
-	isLogin := <-c.CmdChan
-	log.Println("isLogin = ", isLogin)
-	if isLogin.Cmd == enum.LoginPacket {
-		if isLogin.Data.(int) == 0 {
-			utils.PrintMessage("登录成功！")
-			c.Token = isLogin.Token
-			return nil
-		} else if isLogin.Data.(int) == 1 {
-			utils.PrintMessage("用户名或密码错误！")
-			return myerror.New("PassWordWrongError")
-		} else {
-			utils.PrintMessage("用户名不存在！")
-			return myerror.New("NoUserNameError")
-		}
+
+	if loginInfo.Data.(int) == 0 {
+		utils.PrintMessage("登录成功！")
+		c.Token = loginInfo.Token
+		return nil
+	} else if loginInfo.Data.(int) == 1 {
+		utils.PrintMessage("密码错误")
+		return myerror.New("密码错误")
+	} else {
+		utils.PrintMessage("用户名不存在")
+		return myerror.New("用户名不存在")
 	}
-	return nil
 }

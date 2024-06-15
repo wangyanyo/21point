@@ -39,3 +39,19 @@ var SearchViewTail = `
 var MatchView = `
 正在为你匹配对手......
 `
+
+var MatchOffView = `
+正在取消匹配......
+`
+
+var EnterRoomView = `
+正在进入房间......
+`
+
+var PlayGameViewHead = `
+================ PlayGame ================
+`
+
+var PlayGameViewTail = `
+操作：0 要牌  1 停牌  2 发起聊天  3 退出房间
+`

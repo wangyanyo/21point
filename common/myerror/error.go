@@ -28,22 +28,25 @@ func PrintError(err error) {
 	time.Sleep(1 * time.Second)
 }
 
-func CheckPacket(data *entity.TransfeData, cmd enum.Command, str ...string) error {
+func CheckPacket(data *entity.TransfeData, cmd enum.Command, errMsg ...[]string) error {
+	log.Println(string(cmd), data)
 	if data.Cmd != cmd {
-		err := New(string(cmd) + "PacketError")
+		err := New(string(cmd) + "--PacketError")
 		PrintError(err)
 		return err
-	} else {
-		err := New(string(cmd) + "Error ")
-		fmt.Println(str)
+	} else if data.Code != 1 {
+		err := New(string(cmd) + "--RequestError ")
+		fmt.Println(errMsg)
 		PrintError(err)
 		return err
 	}
+	return nil
 }
 
-func Reconnect(err error) {
+func Reconnect(err error, cnt int) {
 	models.Rconn <- true
 	log.Println("断线重连...", err)
-	fmt.Println("断线重连...")
+	fmt.Printf("第%d次断线重连...", cnt)
 	time.Sleep(1 * time.Second)
+	fmt.Print("\033[2K\r")
 }

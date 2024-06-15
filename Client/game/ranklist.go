@@ -11,7 +11,6 @@ import (
 	"github.com/wangyanyo/21point/Client/view"
 	"github.com/wangyanyo/21point/common/entity"
 	"github.com/wangyanyo/21point/common/enum"
-	"github.com/wangyanyo/21point/common/myerror"
 	"github.com/wangyanyo/21point/common/utils"
 )
 
@@ -21,18 +20,15 @@ func RankList(c *models.TcpClient) error {
 		utils.Cle()
 		log.Println("查看排行榜", cnt)
 		fmt.Print(view.RankListViewHead)
-		if _, err := c.Send(entity.NewTransfeData(enum.RankListPactet, "", cnt)); err != nil {
-			myerror.Reconnect(err)
-			return err
-		}
-		rankList := <-c.CmdChan
-		if err := myerror.CheckPacket(rankList, enum.RankListPactet); err != nil {
+		rankListInfo, err := utils.RAL(c, enum.RankListPactet, "", cnt)
+		if err != nil {
 			return err
 		}
 
-		for i, v := range rankList.Data.([]entity.UserScoreInfo) {
+		for i, v := range rankListInfo.Data.([]entity.UserScoreInfo) {
 			fmt.Println(strconv.Itoa(cnt+i) + "\t\t" + v.Name + "\t\t" + strconv.Itoa(v.Score))
 		}
+
 		fmt.Print(view.RankListViewTail)
 		fmt.Print("请输入: ")
 		scanner := bufio.NewScanner(os.Stdin)
@@ -47,15 +43,16 @@ func RankList(c *models.TcpClient) error {
 			continue
 		}
 		if text == "1" {
-			if _, err := c.Send(entity.NewTransfeData(enum.UserCountPacket, "", 0)); err != nil {
-				myerror.Reconnect(err)
-				return err
+			userCountInfo, err := utils.RAL(c, enum.UserCountPacket, "", 0)
+			if err != nil {
+				if err.Error() == "505" {
+					return err
+				} else {
+					continue
+				}
 			}
-			userCount := <-c.CmdChan
-			if err := myerror.CheckPacket(userCount, enum.UserCountPacket); err != nil {
-				continue
-			}
-			num := userCount.Data.(int)
+
+			num := userCountInfo.Data.(int)
 
 			if cnt+10 > num {
 				utils.PrintMessage("这是最后一页！")

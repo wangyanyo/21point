@@ -10,7 +10,6 @@ import (
 	"github.com/wangyanyo/21point/Client/view"
 	"github.com/wangyanyo/21point/common/entity"
 	"github.com/wangyanyo/21point/common/enum"
-	"github.com/wangyanyo/21point/common/myerror"
 	"github.com/wangyanyo/21point/common/utils"
 )
 
@@ -29,16 +28,11 @@ func Register(c *models.TcpClient) error {
 		Name:     username,
 		Password: password,
 	}
-	if _, err := c.Send(entity.NewTransfeData(enum.RegisterPacket, "", userData)); err != nil {
-		myerror.Reconnect(err)
+	isRegisterInfo, err := utils.RAL(c, enum.RegisterPacket, "", userData)
+	if err != nil {
 		return err
 	}
-	isRegister := <-c.CmdChan
-	log.Println("isReister = ", isRegister)
-	if err := myerror.CheckPacket(isRegister, enum.RegisterPacket, "用户名已存在，注册失败"); err != nil {
-		return err
-	}
-	c.Token = isRegister.Token
+	c.Token = isRegisterInfo.Token
 	utils.PrintMessage("注册成功！")
 	return nil
 }
