@@ -65,3 +65,21 @@ func SendRequest(c *models.TcpClient, cmd enum.Command, token string, data inter
 	}
 	return nil
 }
+
+func CalcPoint(cards []string) int {
+	res, cnt := 0, 0
+	for _, s := range cards {
+		if s == "A" {
+			res++
+			cnt++
+		} else if s == "10" || s == "J" || s == "Q" || s == "K" {
+			res += 10
+		} else {
+			res += int(s[0] - '0')
+		}
+	}
+	if cnt > 0 && res+10 <= 21 {
+		res += 10
+	}
+	return res
+}
