@@ -9,8 +9,8 @@ import (
 var Rconn = make(chan bool)
 
 type TcpClient struct {
-	Connection net.TCPConn
-	HawkServer net.TCPAddr
+	Connection *net.TCPConn
+	HawkServer *net.TCPAddr
 	StopChan   chan struct{}
 	CmdChan    chan *entity.TransfeData
 	Token      string
@@ -24,7 +24,7 @@ func (c *TcpClient) Read(b []byte) (int, error) {
 	return c.Connection.Read(b)
 }
 
-func (c *TcpClient) Addr(b []byte) string {
+func (c *TcpClient) Addr() string {
 	return c.Connection.RemoteAddr().String()
 }
 

@@ -12,7 +12,7 @@ import (
 	"github.com/wangyanyo/21point/common/utils"
 )
 
-func checkQuit(ch chan int) {
+func checkQuit(ch chan struct{}) {
 	keysEvents, err := keyboard.GetKeys(10)
 	if err != nil {
 		panic(err)
@@ -25,7 +25,7 @@ func checkQuit(ch chan int) {
 		select {
 		case event := <-keysEvents:
 			if event.Rune == 'q' {
-				ch <- 1
+				ch <- struct{}{}
 				return
 			}
 		case <-ch:
@@ -40,16 +40,16 @@ func Match(c *models.TcpClient) error {
 	fmt.Print(view.MatchView)
 
 	if _, err := c.Send(entity.NewTransfeData(enum.MatchPacket, c.Token, 0)); err != nil {
-		myerror.Reconnect(err, 1)
+		myerror.Reconnect(c, err, 1)
 		return err
 	}
 
-	ch := make(chan int)
+	ch := make(chan struct{})
 	go checkQuit(ch)
 
 	select {
 	case roomInfo := <-c.CmdChan:
-		ch <- 1
+		ch <- struct{}{}
 		err := myerror.CheckPacket(roomInfo, enum.MatchPacket)
 		if err != nil {
 			return err
