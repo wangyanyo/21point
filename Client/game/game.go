@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/wangyanyo/21point/Client/models"
+	"github.com/wangyanyo/21point/Client/ral"
 	"github.com/wangyanyo/21point/Client/view"
 	"github.com/wangyanyo/21point/common/enum"
 	"github.com/wangyanyo/21point/common/utils"
@@ -16,7 +17,7 @@ func Game(c *models.TcpClient) error {
 		utils.Cle()
 		fmt.Print(view.GameView)
 		fmt.Print("你的分数: ")
-		scoreInfo, err := utils.RAL(c, enum.GetScorePacket, c.Token, "")
+		scoreInfo, err := ral.RAL(c, enum.GetScorePacket, c.Token, "")
 		if err != nil {
 			if err.Error() == "505" {
 				return err

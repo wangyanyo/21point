@@ -37,8 +37,7 @@ func Home(c *models.TcpClient) error {
 			continue
 		}
 		if text == "2" {
-			c.StopChan <- struct{}{}
-			c.Connection.Close()
+			models.ExitChan <- struct{}{}
 			utils.PrintMessage("退出游戏成功！")
 			return nil
 		}

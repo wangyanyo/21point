@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/wangyanyo/21point/Client/models"
+	"github.com/wangyanyo/21point/Client/ral"
 	"github.com/wangyanyo/21point/Client/view"
 	"github.com/wangyanyo/21point/common/enum"
 	"github.com/wangyanyo/21point/common/utils"
@@ -14,7 +15,7 @@ func EnterRoom(c *models.TcpClient, roomID int) error {
 	utils.Cle()
 	fmt.Print(view.EnterRoomView)
 
-	if _, err := utils.RAL(c, enum.EnterRoomPacket, c.Token, roomID); err != nil {
+	if _, err := ral.RAL(c, enum.EnterRoomPacket, c.Token, roomID); err != nil {
 		return err
 	}
 

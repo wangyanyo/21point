@@ -34,7 +34,7 @@ func CheckPacket(data *entity.TransfeData, cmd enum.Command, errMsg ...[]string)
 		PrintError(err)
 		return err
 	} else if data.Code != 1 {
-		err := New(string(cmd) + "--RequestError ")
+		err := New(string(cmd) + "--RequestError")
 		fmt.Println(errMsg)
 		PrintError(err)
 		return err

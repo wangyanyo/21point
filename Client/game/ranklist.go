@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/wangyanyo/21point/Client/models"
+	"github.com/wangyanyo/21point/Client/ral"
 	"github.com/wangyanyo/21point/Client/view"
 	"github.com/wangyanyo/21point/common/entity"
 	"github.com/wangyanyo/21point/common/enum"
@@ -20,7 +21,7 @@ func RankList(c *models.TcpClient) error {
 		utils.Cle()
 		log.Println("查看排行榜", cnt)
 		fmt.Print(view.RankListViewHead)
-		rankListInfo, err := utils.RAL(c, enum.RankListPactet, "", cnt)
+		rankListInfo, err := ral.RAL(c, enum.RankListPactet, "", cnt)
 		if err != nil {
 			return err
 		}
@@ -43,7 +44,7 @@ func RankList(c *models.TcpClient) error {
 			continue
 		}
 		if text == "1" {
-			userCountInfo, err := utils.RAL(c, enum.UserCountPacket, "", 0)
+			userCountInfo, err := ral.RAL(c, enum.UserCountPacket, "", 0)
 			if err != nil {
 				if err.Error() == "505" {
 					return err

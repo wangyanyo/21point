@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/wangyanyo/21point/Client/models"
+	"github.com/wangyanyo/21point/Client/ral"
 	"github.com/wangyanyo/21point/Client/view"
 	"github.com/wangyanyo/21point/common/entity"
 	"github.com/wangyanyo/21point/common/enum"
@@ -33,7 +34,7 @@ func Search(c *models.TcpClient) error {
 			fmt.Print("请输入用户名: ")
 			scanner.Scan()
 			username := scanner.Scan()
-			userInfo, err := utils.RAL(c, enum.SearchPacket, "", username)
+			userInfo, err := ral.RAL(c, enum.SearchPacket, "", username)
 			if err != nil {
 				return err
 			}

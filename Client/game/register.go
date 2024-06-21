@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/wangyanyo/21point/Client/models"
+	"github.com/wangyanyo/21point/Client/ral"
 	"github.com/wangyanyo/21point/Client/view"
 	"github.com/wangyanyo/21point/common/entity"
 	"github.com/wangyanyo/21point/common/enum"
@@ -28,7 +29,7 @@ func Register(c *models.TcpClient) error {
 		Name:     username,
 		Password: password,
 	}
-	isRegisterInfo, err := utils.RAL(c, enum.RegisterPacket, "", userData)
+	isRegisterInfo, err := ral.RAL(c, enum.RegisterPacket, "", userData)
 	if err != nil {
 		return err
 	}

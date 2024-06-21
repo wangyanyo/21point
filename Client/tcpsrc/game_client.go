@@ -1,13 +1,15 @@
 package tcpsrc
 
 import (
-	"io"
+	"context"
+	"fmt"
 	"log"
 	"net"
 	"time"
 
 	"github.com/wangyanyo/21point/Client/game"
 	"github.com/wangyanyo/21point/Client/models"
+	"github.com/wangyanyo/21point/Client/ral"
 	"github.com/wangyanyo/21point/common/entity"
 	"github.com/wangyanyo/21point/common/enum"
 )
@@ -22,11 +24,15 @@ func Run() {
 		return
 	}
 
-	connection, err := net.DialTCP("tcp", nil, hawkServer)
-	if err != nil {
+	var connection *net.TCPConn
+	for {
+		connection, err = net.DialTCP("tcp", nil, hawkServer)
+		if err == nil {
+			break
+		}
+		log.Printf("connect to hawk server error: [%s]", err.Error())
 		log.Printf("connect to hawk server error: [%s]", err.Error())
 		time.Sleep(1 * time.Second)
-		///////////////////////////////////////////////////////////////////////////////
 	}
 
 	client := &models.TcpClient{
@@ -36,43 +42,83 @@ func Run() {
 		CmdChan:    make(chan *entity.TransfeData),
 	}
 
+	ctx, cancel := context.WithCancel(context.Background())
+
 	//启动接收
-	go func(conn *models.TcpClient) {
+	go func(ctx context.Context, conn *models.TcpClient) {
 		resv := make([]byte, 1024)
+		ch := make(chan int)
 		for {
-			n, err := conn.Read(resv)
-			if err != nil {
-				if err == io.EOF {
-					log.Printf(conn.Addr(), " 断开了连接")
-					conn.Close()
+			go func(c *models.TcpClient, ch chan int, resv []byte) {
+				n, err := conn.Read(resv)
+				if err != nil {
+					ch <- 0
 					return
 				}
-			}
-			if n > 0 && n < 1025 {
-				conn.CmdChan <- entity.TransfeDataDecoder(resv)
-			}
-		}
-	}(client)
+				ch <- n
+			}(conn, ch, resv)
 
-	go func(conn *models.TcpClient) {
+			select {
+			case n := <-ch:
+				if n > 0 && n < 1025 {
+					conn.CmdChan <- entity.TransfeDataDecoder(resv)
+				}
+
+			case <-models.ReConnChan:
+				conn.Close()
+				models.ConnChan <- struct{}{}
+
+			case <-ctx.Done():
+				conn.Close()
+				fmt.Println("接收协程关闭")
+				return
+
+			}
+
+		}
+	}(ctx, client)
+
+	go func(ctx context.Context, conn *models.TcpClient) {
 		i := 0
-		heartBeatTick := time.Tick(10 * time.Second)
+		heartBeatTick := time.NewTicker(10 * time.Second)
 		for {
 			select {
-			case <-heartBeatTick:
+			case <-heartBeatTick.C:
 				heartBeat := entity.NewTransfeData(enum.HeartPacket, "", i)
 				if _, err := conn.Send(heartBeat); err != nil {
-					models.Rconn <- true
-					return
+					ral.Connect()
 				}
 				i++
 
 			case <-conn.StopChan:
 				return
+
+			case <-ctx.Done():
+				fmt.Println("心跳协程关闭")
+				return
 			}
 		}
-	}(client)
+	}(ctx, client)
 
 	go game.Home(client)
 
+	for {
+		select {
+		case <-models.ConnChan:
+			models.Connecting = true
+			log.Println("Connect")
+			client.Connection, err = net.DialTCP("tcp", nil, hawkServer)
+			if err != nil {
+				log.Printf("connect to hawk server error: [%s] " + err.Error())
+			}
+			models.Connecting = false
+			models.EndConnChan <- struct{}{}
+
+		case <-models.ExitChan:
+			cancel()
+			time.Sleep(1 * time.Second)
+			return
+
+		}
+	}
 }

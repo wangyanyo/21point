@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/wangyanyo/21point/Client/models"
+	"github.com/wangyanyo/21point/Client/ral"
 	"github.com/wangyanyo/21point/Client/view"
 	"github.com/wangyanyo/21point/common/entity"
 	"github.com/wangyanyo/21point/common/enum"
@@ -29,7 +30,7 @@ func Login(c *models.TcpClient) error {
 		Name:     username,
 		Password: password,
 	}
-	loginInfo, err := utils.RAL(c, enum.LoginPacket, "", userData)
+	loginInfo, err := ral.RAL(c, enum.LoginPacket, "", userData)
 	if err != nil {
 		return err
 	}

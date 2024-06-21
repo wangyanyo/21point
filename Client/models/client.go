@@ -6,7 +6,11 @@ import (
 	"github.com/wangyanyo/21point/common/entity"
 )
 
-var Rconn = make(chan bool)
+var ReConnChan = make(chan struct{})
+var ConnChan = make(chan struct{})
+var EndConnChan = make(chan struct{})
+var ExitChan = make(chan struct{})
+var Connecting = false
 
 type TcpClient struct {
 	Connection *net.TCPConn
@@ -30,5 +34,4 @@ func (c *TcpClient) Addr() string {
 
 func (c *TcpClient) Close() {
 	c.Connection.Close()
-	Rconn <- true
 }

@@ -7,36 +7,37 @@ import (
 	"time"
 
 	"github.com/wangyanyo/21point/Client/models"
+	"github.com/wangyanyo/21point/Client/ral"
 	"github.com/wangyanyo/21point/Client/view"
 	"github.com/wangyanyo/21point/common/enum"
 	"github.com/wangyanyo/21point/common/utils"
 )
 
 func waitResult(c *models.TcpClient, point int) error {
-	resultInfo, err := utils.RAL(c, enum.GameResultPacket, c.Token, point)
+	resultInfo, err := ral.RAL(c, enum.GameResultPacket, c.Token, point)
 	if err != nil {
 		return err
 	}
 	if resultInfo.Data.(int) == 0 {
-		fmt.Printf("\033[91m你输了\033[0m")
+		fmt.Printf("\033[91m你输了, Score-10\033[0m")
 	} else if resultInfo.Data.(int) == 1 {
 		fmt.Printf("\033[93m平局\033[0m")
 	} else {
-		fmt.Printf("\033[92m平局\033[0m")
+		fmt.Printf("\033[92m你赢了, Score+10\033[0m")
 	}
 	time.Sleep(1500 * time.Millisecond)
 	return nil
 }
 
 func exitRoom(c *models.TcpClient) {
-	utils.RAL(c, enum.ExitRoomPacket, c.Token, "")
+	ral.RAL(c, enum.ExitRoomPacket, c.Token, "")
 }
 
 func PlayGame(c *models.TcpClient) error {
 	myCards := []string{}
 	for {
 		if len(myCards) == 0 {
-			initCardInfo, err := utils.RAL(c, enum.InitCardPacket, c.Token, "")
+			initCardInfo, err := ral.RAL(c, enum.InitCardPacket, c.Token, "")
 			if err != nil {
 				exitRoom(c)
 				return err
@@ -63,7 +64,7 @@ func PlayGame(c *models.TcpClient) error {
 			scanner.Scan()
 			opt := scanner.Text()
 			if opt == "0" {
-				cardInfo, err := utils.RAL(c, enum.AskCardsPactet, c.Token, "")
+				cardInfo, err := ral.RAL(c, enum.AskCardsPactet, c.Token, "")
 				if err != nil {
 					continue
 				}
