@@ -12,4 +12,6 @@
 
 5. Acwing 147
 
-6. Codeforces Educational_167_Ds
+6. Codeforces Educational_167_D
+
+7. leetCode 充值会员并做题
