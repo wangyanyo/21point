@@ -65,4 +65,5 @@
 21. 为服务端添加普罗米修斯监控
     参考地址：https://blog.csdn.net/qq_31725371/article/details/114697770
 
-22. 我觉得公司的代码是可以再优化一下的
+22. 看看代码里有哪些需要加锁的地方，加互斥锁会更好
+    参考文章：https://www.cnblogs.com/chenqionghe/p/13919427.html
