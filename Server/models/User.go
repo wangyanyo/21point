@@ -1,6 +1,11 @@
 package models
 
-import "time"
+import (
+	"log"
+	"time"
+
+	"github.com/wangyanyo/21point/common/db"
+)
 
 type User struct {
 	Id         int       `grom:"primary_key;auto_increment" json:"id"`
@@ -14,6 +19,9 @@ func (user *User) TableName() string {
 	return "tbl_user"
 }
 
-func (user *User) InitTable() {
-
+func (user *User) CreateTable() {
+	if !db.MysqlDB.HasTable(user.TableName()) {
+		log.Println("CreateTable User")
+		db.MysqlDB.CreateTable(&User{})
+	}
 }
