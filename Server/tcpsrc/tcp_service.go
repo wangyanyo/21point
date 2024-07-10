@@ -1,6 +1,7 @@
 package tcpsrc
 
 import (
+	"io"
 	"log"
 	"net"
 
@@ -32,9 +33,28 @@ func Run() {
 			log.Println("[连接失败]", err.Error())
 			continue
 		}
-		log.Println("[连接成功]", )
-		go func(conn net.Conn) {
-			
-		}(conn)
+		log.Println("[连接成功]", conn.RemoteAddr().String(), conn)
+
+		clientUser := &ClientUser{
+			Connection: conn,
+		}
+
+		go func(client *ClientUser) {
+			resv := make([]byte, 1024)
+			for {
+				n, err := client.Connection.Read(resv)
+				log.Println(n, err)
+				if err != nil {
+					if err == io.EOF {
+						//退出房间
+						return
+					}
+				}
+				if n > 0 && n < 1025 {
+					Router(client, resv[:n])
+				}
+			}
+
+		}(clientUser)
 	}
 }
