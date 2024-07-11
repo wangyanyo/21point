@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 
+	"github.com/wangyanyo/21point/common/entity"
 	"github.com/wangyanyo/21point/common/myerror"
 )
 
@@ -41,17 +42,23 @@ func Run() {
 
 		go func(client *ClientUser) {
 			resv := make([]byte, 1024)
-			for {
+			ch := make(chan int)
+			go func(client *ClientUser, resv []byte, ch chan int) {
 				n, err := client.Connection.Read(resv)
-				log.Println(n, err)
 				if err != nil {
 					if err == io.EOF {
-						//退出房间
 						return
 					}
+					ch <- 0
+					return
 				}
+				ch <- n
+			}(client, resv, ch)
+
+			select {
+			case n := <-ch:
 				if n > 0 && n < 1025 {
-					Router(client, resv[:n])
+					Router(entity.TransfeDataDecoder(resv))
 				}
 			}
 
