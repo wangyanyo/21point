@@ -26,6 +26,7 @@ type TransfeData struct {
 	Data      interface{} //传输的数据
 	Message   string      //传输消息
 	Code      int         //传输Code
+	RoomID    int         //房间号
 }
 
 // 数据压缩

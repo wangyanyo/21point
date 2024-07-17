@@ -2,6 +2,7 @@ package game
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -11,7 +12,6 @@ import (
 	"github.com/wangyanyo/21point/Client/view"
 	"github.com/wangyanyo/21point/common/entity"
 	"github.com/wangyanyo/21point/common/enum"
-	"github.com/wangyanyo/21point/common/myerror"
 	"github.com/wangyanyo/21point/common/utils"
 )
 
@@ -30,7 +30,13 @@ func Login(c *models.TcpClient) error {
 		Name:     username,
 		Password: password,
 	}
-	loginInfo, err := ral.RAL(c, enum.LoginPacket, "", userData)
+	req := &entity.TransfeData{
+		Cmd:    enum.LoginPacket,
+		Token:  c.Token,
+		RoomID: c.RoomID,
+		Data:   userData,
+	}
+	loginInfo, err := ral.Ral(c, req)
 	if err != nil {
 		return err
 	}
@@ -41,9 +47,9 @@ func Login(c *models.TcpClient) error {
 		return nil
 	} else if loginInfo.Data.(int) == 1 {
 		utils.PrintMessage("密码错误")
-		return myerror.New("密码错误")
+		return errors.New("密码错误")
 	} else {
 		utils.PrintMessage("用户名不存在")
-		return myerror.New("用户名不存在")
+		return errors.New("用户名不存在")
 	}
 }

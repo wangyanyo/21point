@@ -1,25 +1,13 @@
 package myerror
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"time"
 
 	"github.com/wangyanyo/21point/common/entity"
-	"github.com/wangyanyo/21point/common/enum"
 )
-
-type MyError struct {
-	s string
-}
-
-func New(text string) error {
-	return &MyError{text}
-}
-
-func (e *MyError) Error() string {
-	return e.s
-}
 
 func PrintError(err error) {
 	log.Println(err)
@@ -27,15 +15,14 @@ func PrintError(err error) {
 	time.Sleep(1 * time.Second)
 }
 
-func CheckPacket(data *entity.TransfeData, cmd enum.Command, errMsg ...[]string) error {
-	log.Println(string(cmd), data)
-	if data.Cmd != cmd {
-		err := New(string(cmd) + "--PacketError")
+func CheckPacket(data *entity.TransfeData, req *entity.TransfeData) error {
+	log.Println(string(req.Cmd), data)
+	if data.Cmd != req.Cmd {
+		err := errors.New(string(req.Cmd) + "--PacketError")
 		PrintError(err)
 		return err
 	} else if data.Code != 1 {
-		err := New(string(cmd) + "--RequestError")
-		fmt.Println(errMsg)
+		err := errors.New(string(req.Cmd) + "--RequestError")
 		PrintError(err)
 		return err
 	}

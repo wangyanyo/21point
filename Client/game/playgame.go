@@ -9,12 +9,19 @@ import (
 	"github.com/wangyanyo/21point/Client/models"
 	"github.com/wangyanyo/21point/Client/ral"
 	"github.com/wangyanyo/21point/Client/view"
+	"github.com/wangyanyo/21point/common/entity"
 	"github.com/wangyanyo/21point/common/enum"
 	"github.com/wangyanyo/21point/common/utils"
 )
 
 func waitResult(c *models.TcpClient, point int) error {
-	resultInfo, err := ral.RAL(c, enum.GameResultPacket, c.Token, point)
+	req := &entity.TransfeData{
+		Cmd:    enum.GameResultPacket,
+		Token:  c.Token,
+		RoomID: c.RoomID,
+		Data:   point,
+	}
+	resultInfo, err := ral.Ral(c, req)
 	if err != nil {
 		return err
 	}
@@ -30,7 +37,12 @@ func waitResult(c *models.TcpClient, point int) error {
 }
 
 func exitRoom(c *models.TcpClient) {
-	ral.RAL(c, enum.ExitRoomPacket, c.Token, "")
+	req := &entity.TransfeData{
+		Cmd:    enum.ExitRoomPacket,
+		Token:  c.Token,
+		RoomID: c.RoomID,
+	}
+	ral.Ral(c, req)
 }
 
 func PlayGame(c *models.TcpClient) error {

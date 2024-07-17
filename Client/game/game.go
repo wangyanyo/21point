@@ -8,6 +8,7 @@ import (
 	"github.com/wangyanyo/21point/Client/models"
 	"github.com/wangyanyo/21point/Client/ral"
 	"github.com/wangyanyo/21point/Client/view"
+	"github.com/wangyanyo/21point/common/entity"
 	"github.com/wangyanyo/21point/common/enum"
 	"github.com/wangyanyo/21point/common/utils"
 )
@@ -17,13 +18,14 @@ func Game(c *models.TcpClient) error {
 		utils.Cle()
 		fmt.Print(view.GameView)
 		fmt.Print("你的分数: ")
-		scoreInfo, err := ral.RAL(c, enum.GetScorePacket, c.Token, "")
+		req := &entity.TransfeData{
+			Cmd:    enum.GetScorePacket,
+			Token:  c.Token,
+			RoomID: c.RoomID,
+		}
+		scoreInfo, err := ral.Ral(c, req)
 		if err != nil {
-			if err.Error() == "505" {
-				return err
-			} else {
-				continue
-			}
+			continue
 		}
 
 		fmt.Println(scoreInfo.Data.(int))

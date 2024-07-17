@@ -1,9 +1,10 @@
 package dao
 
 import (
+	"errors"
+
 	"github.com/wangyanyo/21point/Server/models"
 	"github.com/wangyanyo/21point/common/db"
-	"github.com/wangyanyo/21point/common/myerror"
 )
 
 type UserDao struct {
@@ -55,7 +56,7 @@ func (d *UserDao) Get() (models.User, error) {
 	if ok {
 		err = dbConn.First(&data).Error
 	} else {
-		err = myerror.New("参数不全")
+		err = errors.New("参数不全")
 	}
 
 	return data, err
