@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/wangyanyo/21point/Client/tcpsrc"
 	"github.com/wangyanyo/21point/Server/dao"
 	"github.com/wangyanyo/21point/Server/service"
 	"github.com/wangyanyo/21point/common/db"
@@ -15,5 +16,5 @@ func init() {
 }
 
 func main() {
-
+	tcpsrc.Run()
 }

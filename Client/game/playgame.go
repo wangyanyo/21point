@@ -1,9 +1,7 @@
 package game
 
 import (
-	"bufio"
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/wangyanyo/21point/Client/models"
@@ -91,16 +89,7 @@ func PlayGame(c *models.TcpClient) error {
 
 		if !stopFlag {
 			fmt.Print(view.PlayGameViewTail)
-			var opt string
-			for {
-				fmt.Print("请输入：")
-				scanner := bufio.NewScanner(os.Stdin)
-				scanner.Scan()
-				opt = scanner.Text()
-				if opt == "0" || opt == "1" || opt == "2" || opt == "3" {
-					break
-				}
-			}
+			opt := utils.GetOpt("请输入: ", 3)
 			if opt == "0" {
 				req := &entity.TransfeData{
 					Cmd:    enum.AskCardsPactet,
@@ -114,6 +103,7 @@ func PlayGame(c *models.TcpClient) error {
 				}
 				card := cardInfo.Data.(string)
 				myCards = append(myCards, card)
+				continue
 
 			} else if opt == "1" {
 				stopFlag = true

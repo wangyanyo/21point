@@ -26,11 +26,9 @@ func Search(c *models.TcpClient) error {
 			fmt.Print("\n\n")
 		}
 		fmt.Print(view.SearchViewTail)
-		fmt.Print("请输入: ")
-		scanner := bufio.NewScanner(os.Stdin)
-		scanner.Scan()
-		text := scanner.Text()
-		if text == "0" {
+		opt := utils.GetOpt("请输入: ", 1)
+		if opt == "0" {
+			scanner := bufio.NewScanner(os.Stdin)
 			fmt.Print("请输入用户名: ")
 			scanner.Scan()
 			username := scanner.Scan()
@@ -48,7 +46,7 @@ func Search(c *models.TcpClient) error {
 			targetUser = userInfo.Data.(entity.UserScoreInfo)
 			flag = true
 		}
-		if text == "1" {
+		if opt == "1" {
 			utils.PrintMessage("退出搜索界面成功！")
 			return nil
 		}

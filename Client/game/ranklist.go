@@ -1,10 +1,8 @@
 package game
 
 import (
-	"bufio"
 	"fmt"
 	"log"
-	"os"
 	"strconv"
 
 	"github.com/wangyanyo/21point/Client/models"
@@ -37,11 +35,8 @@ func RankList(c *models.TcpClient) error {
 		}
 
 		fmt.Print(view.RankListViewTail)
-		fmt.Print("请输入: ")
-		scanner := bufio.NewScanner(os.Stdin)
-		scanner.Scan()
-		text := scanner.Text()
-		if text == "0" {
+		opt := utils.GetOpt("请输入: ", 3)
+		if opt == "0" {
 			if cnt == 1 {
 				utils.PrintMessage("这是第一页！")
 				continue
@@ -49,7 +44,7 @@ func RankList(c *models.TcpClient) error {
 			cnt = max(1, cnt-10)
 			continue
 		}
-		if text == "1" {
+		if opt == "1" {
 			req := &entity.TransfeData{
 				Cmd:    enum.UserCountPacket,
 				Token:  c.Token,
@@ -73,13 +68,13 @@ func RankList(c *models.TcpClient) error {
 			cnt = min(num, cnt+10)
 			continue
 		}
-		if text == "2" {
+		if opt == "2" {
 			if err := Search(c); err != nil {
 				continue
 			}
 			continue
 		}
-		if text == "3" {
+		if opt == "3" {
 			utils.PrintMessage("退出排行榜成功！")
 			return nil
 		}

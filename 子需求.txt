@@ -286,6 +286,9 @@
     子需求：读ants原生文章，并作总结。
         地址：https://segmentfault.com/a/1190000015464889
 
+    子需求：gorm零值不更新怎么办？
+        参考地址：https://blog.csdn.net/damanchen/article/details/124717553
+
 
 
 

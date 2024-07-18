@@ -1,9 +1,7 @@
 package game
 
 import (
-	"bufio"
 	"fmt"
-	"os"
 
 	"github.com/wangyanyo/21point/Client/models"
 	"github.com/wangyanyo/21point/Client/ral"
@@ -30,23 +28,25 @@ func Game(c *models.TcpClient) error {
 
 		fmt.Println(scoreInfo.Data.(int))
 
-		fmt.Print("请输入: ")
-		scanner := bufio.NewScanner(os.Stdin)
-		scanner.Scan()
-		text := scanner.Text()
-		if text == "0" {
+		opt := utils.GetOpt("请输入: ", 3)
+		if opt == "0" {
 			if err := Match(c); err != nil {
 				continue
 			}
 			continue
 		}
-		if text == "1" {
+		if opt == "1" {
 			if err := RankList(c); err != nil {
 				continue
 			}
 			continue
 		}
-		if text == "2" {
+		if opt == "2" {
+			c.Token = ""
+			utils.PrintMessage("退出登陆成功！")
+			return nil
+		}
+		if opt == "3" {
 			utils.PrintMessage("退出游戏界面成功！")
 			return nil
 		}

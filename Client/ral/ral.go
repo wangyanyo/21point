@@ -52,7 +52,7 @@ func CheckPacket(data *entity.TransfeData, req *entity.TransfeData) error {
 		myerror.PrintError(err)
 		return err
 	} else if data.Code != 0 {
-		err := errors.New(string(req.Cmd) + "--RequestError" + data.Message)
+		err := errors.New(string(req.Cmd) + "--RequestError" + data.Msg)
 		myerror.PrintError(err)
 		return err
 	}

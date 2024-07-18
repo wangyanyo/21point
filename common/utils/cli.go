@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"bufio"
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
@@ -53,4 +54,27 @@ func CalcPoint(cards []string) int {
 		res += 10
 	}
 	return res
+}
+
+func GetOpt(msg string, x int) string {
+	var opt string
+	for {
+		fmt.Print(msg)
+		scanner := bufio.NewScanner(os.Stdin)
+		scanner.Scan()
+		opt = scanner.Text()
+		flag := false
+		for i := 0; i <= x; i++ {
+			if opt == string('0'+i) {
+				flag = true
+			}
+		}
+		if flag {
+			break
+		}
+		fmt.Printf("\033[1A\r")
+		fmt.Printf("%*c", 50, ' ')
+		fmt.Printf("\r")
+	}
+	return opt
 }

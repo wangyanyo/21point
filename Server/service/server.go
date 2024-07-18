@@ -3,17 +3,17 @@ package service
 import "github.com/wangyanyo/21point/Server/dao"
 
 type Server struct {
-	Dao *dao.UserDao
+	UserDao *dao.UserDao
 }
 
-var server *Server
+var defaultServer *Server
 
 func GetServer() *Server {
-	return server
+	return defaultServer
 }
 
 func InitServer() {
-	server = &Server{
-		Dao: &dao.UserDao{},
+	defaultServer = &Server{
+		UserDao: &dao.UserDao{},
 	}
 }

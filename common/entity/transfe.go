@@ -24,7 +24,7 @@ type TransfeData struct {
 	Timestamp int64
 	Token     string      //识别客户端身份
 	Data      interface{} //传输的数据
-	Message   string      //传输消息
+	Msg       string      //传输消息
 	Code      int         //传输Code
 	RoomID    int         //房间号
 }
