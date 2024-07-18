@@ -21,6 +21,7 @@ func Router(ctx context.Context, req *entity.TransfeData, client *models.ClientU
 		resp = ser.LoginHandler(ctx, req)
 
 	case enum.GetScorePacket: //获取分数
+		resp = ser.GetSocreHandler(ctx, req)
 
 	case enum.SearchPacket: //搜索玩家信息
 

@@ -289,6 +289,10 @@
     子需求：gorm零值不更新怎么办？
         参考地址：https://blog.csdn.net/damanchen/article/details/124717553
 
+    子需求：recover()函数是什么意思？
+
+    子需求：我想给Token加密，想用Md5，但不知道怎么解密。
+
 
 
 
