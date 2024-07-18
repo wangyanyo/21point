@@ -21,7 +21,13 @@ func RankList(c *models.TcpClient) error {
 		utils.Cle()
 		log.Println("查看排行榜", cnt)
 		fmt.Print(view.RankListViewHead)
-		rankListInfo, err := ral.RAL(c, enum.RankListPactet, "", cnt)
+		req := &entity.TransfeData{
+			Cmd:    enum.RankListPactet,
+			Token:  c.Token,
+			RoomID: c.RoomID,
+			Data:   cnt,
+		}
+		rankListInfo, err := ral.Ral(c, req)
 		if err != nil {
 			return err
 		}
@@ -44,7 +50,12 @@ func RankList(c *models.TcpClient) error {
 			continue
 		}
 		if text == "1" {
-			userCountInfo, err := ral.RAL(c, enum.UserCountPacket, "", 0)
+			req := &entity.TransfeData{
+				Cmd:    enum.UserCountPacket,
+				Token:  c.Token,
+				RoomID: c.RoomID,
+			}
+			userCountInfo, err := ral.Ral(c, req)
 			if err != nil {
 				if err.Error() == "505" {
 					return err

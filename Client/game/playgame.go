@@ -49,15 +49,35 @@ func PlayGame(c *models.TcpClient) error {
 	myCards := []string{}
 	for {
 		if len(myCards) == 0 {
-			initCardInfo, err := ral.RAL(c, enum.InitCardPacket, c.Token, "")
+			req := &entity.TransfeData{
+				Cmd:    enum.InitCardPacket,
+				Token:  c.Token,
+				RoomID: c.RoomID,
+			}
+			initCardInfo, err := ral.Ral(c, req)
 			if err != nil {
 				exitRoom(c)
 				return err
 			}
 			myCards = initCardInfo.Data.([]string)
 		}
+
 		utils.Cle()
 		fmt.Print(view.PlayGameViewHead)
+
+		fmt.Print("你的分数：")
+		req := &entity.TransfeData{
+			Cmd:    enum.GetScorePacket,
+			Token:  c.Token,
+			RoomID: c.RoomID,
+		}
+		scoreInfo, err := ral.Ral(c, req)
+		if err != nil {
+			exitRoom(c)
+			return err
+		}
+		fmt.Println(scoreInfo.Data.(int))
+
 		fmt.Print("你的牌：")
 		for _, card := range myCards {
 			fmt.Printf("%s  ", card)
@@ -71,14 +91,26 @@ func PlayGame(c *models.TcpClient) error {
 
 		if !stopFlag {
 			fmt.Print(view.PlayGameViewTail)
-			fmt.Print("请输入：")
-			scanner := bufio.NewScanner(os.Stdin)
-			scanner.Scan()
-			opt := scanner.Text()
+			var opt string
+			for {
+				fmt.Print("请输入：")
+				scanner := bufio.NewScanner(os.Stdin)
+				scanner.Scan()
+				opt = scanner.Text()
+				if opt == "0" || opt == "1" || opt == "2" || opt == "3" {
+					break
+				}
+			}
 			if opt == "0" {
-				cardInfo, err := ral.RAL(c, enum.AskCardsPactet, c.Token, "")
+				req := &entity.TransfeData{
+					Cmd:    enum.AskCardsPactet,
+					Token:  c.Token,
+					RoomID: c.RoomID,
+				}
+				cardInfo, err := ral.Ral(c, req)
 				if err != nil {
-					continue
+					exitRoom(c)
+					return err
 				}
 				card := cardInfo.Data.(string)
 				myCards = append(myCards, card)
@@ -89,17 +121,18 @@ func PlayGame(c *models.TcpClient) error {
 			} else if opt == "2" {
 
 			} else if opt == "3" {
-
-			} else {
-				continue
+				exitRoom(c)
+				return nil
 			}
 		}
 
 		if stopFlag {
+			fmt.Println("停牌")
 			point := utils.CalcPoint(myCards)
 			err := waitResult(c, point)
 			if err != nil {
-				continue
+				exitRoom(c)
+				return err
 			}
 			myCards = []string{}
 		}

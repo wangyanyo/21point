@@ -2,7 +2,6 @@ package game
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -40,16 +39,7 @@ func Login(c *models.TcpClient) error {
 	if err != nil {
 		return err
 	}
-
-	if loginInfo.Data.(int) == 0 {
-		utils.PrintMessage("登录成功！")
-		c.Token = loginInfo.Token
-		return nil
-	} else if loginInfo.Data.(int) == 1 {
-		utils.PrintMessage("密码错误")
-		return errors.New("密码错误")
-	} else {
-		utils.PrintMessage("用户名不存在")
-		return errors.New("用户名不存在")
-	}
+	utils.PrintMessage("登录成功！")
+	c.Token = loginInfo.Data.(string)
+	return nil
 }

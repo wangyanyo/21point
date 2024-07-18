@@ -7,7 +7,6 @@ import (
 
 	"github.com/wangyanyo/21point/Client/game"
 	"github.com/wangyanyo/21point/Client/models"
-	"github.com/wangyanyo/21point/common/entity"
 )
 
 func Run() {
@@ -22,7 +21,6 @@ func Run() {
 
 	client := &models.TcpClient{
 		TcpAddr: tcpAddr,
-		CmdChan: make(chan *entity.TransfeData),
 	}
 
 	game.Home(client)

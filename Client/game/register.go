@@ -29,7 +29,13 @@ func Register(c *models.TcpClient) error {
 		Name:     username,
 		Password: password,
 	}
-	isRegisterInfo, err := ral.RAL(c, enum.RegisterPacket, "", userData)
+	req := &entity.TransfeData{
+		Cmd:    enum.RegisterPacket,
+		Token:  c.Token,
+		RoomID: c.RoomID,
+		Data:   userData,
+	}
+	isRegisterInfo, err := ral.Ral(c, req)
 	if err != nil {
 		return err
 	}

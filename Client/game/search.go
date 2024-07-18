@@ -34,7 +34,13 @@ func Search(c *models.TcpClient) error {
 			fmt.Print("请输入用户名: ")
 			scanner.Scan()
 			username := scanner.Scan()
-			userInfo, err := ral.RAL(c, enum.SearchPacket, "", username)
+			req := &entity.TransfeData{
+				Cmd:    enum.SearchPacket,
+				Token:  c.Token,
+				RoomID: c.RoomID,
+				Data:   username,
+			}
+			userInfo, err := ral.Ral(c, req)
 			if err != nil {
 				return err
 			}

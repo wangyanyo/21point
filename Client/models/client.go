@@ -2,14 +2,11 @@ package models
 
 import (
 	"net"
-
-	"github.com/wangyanyo/21point/common/entity"
 )
 
 type TcpClient struct {
 	Connection *net.TCPConn
 	TcpAddr    *net.TCPAddr
-	CmdChan    chan *entity.TransfeData
 	Token      string
 	RoomID     int
 }
