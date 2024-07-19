@@ -8,7 +8,7 @@ const (
 	LoginPacket      Command = "Login"      //登录
 	RegisterPacket   Command = "Register"   //注册
 	GetScorePacket   Command = "GetScore"   //获取分数
-	SearchPacket     Command = "Search"     //搜索玩家信息
+	SearchPacket     Command = "Search"     //搜索玩家排名分数
 	RankListPactet   Command = "RankList"   //查看积分排行榜
 	UserCountPacket  Command = "UserCount"  //玩家数量
 	MatchPacket      Command = "Match"      //匹配

@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/redis/go-redis/v9"
 	"github.com/wangyanyo/21point/Server/common"
 	"github.com/wangyanyo/21point/Server/models"
 	"github.com/wangyanyo/21point/common/entity"
@@ -58,6 +59,23 @@ func (ser *Server) register(ctx context.Context, req *entity.TransfeData) (final
 	if err := ser.UserDao.Create(user); err != nil {
 		res.Code = common.CallDBError
 		res.Msg = err.Error()
+		return &res
+	}
+
+	data := redis.Z{
+		Member: user.UserName,
+		Score:  float64(0),
+	}
+	cacheError := ser.CommonCache.ZAdd(ctx, models.RankListCacheKey, data).Err()
+	if cacheError != nil {
+		if err := ser.UserDao.WhereName(user.UserName).Delete(); err != nil {
+			res.Code = common.CallDBError
+			res.Msg = err.Error()
+			return &res
+		}
+
+		res.Code = common.CallRedisError
+		res.Msg = cacheError.Error()
 		return &res
 	}
 

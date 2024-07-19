@@ -12,7 +12,6 @@ import (
 
 type TcpServer struct {
 	Listener *net.TCPListener
-	TcpAddr  *net.TCPAddr
 }
 
 func Run() {
@@ -26,7 +25,6 @@ func Run() {
 
 	tcpServer := TcpServer{
 		Listener: listener,
-		TcpAddr:  tcpAddr,
 	}
 
 	for {

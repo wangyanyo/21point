@@ -39,7 +39,7 @@ func Register(c *models.TcpClient) error {
 	if err != nil {
 		return err
 	}
-	c.Token = isRegisterInfo.Token
+	c.Token = isRegisterInfo.Data.(string)
 	utils.PrintMessage("注册成功！")
 	return nil
 }

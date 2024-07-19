@@ -24,10 +24,13 @@ func Router(ctx context.Context, req *entity.TransfeData, client *models.ClientU
 		resp = ser.GetSocreHandler(ctx, req)
 
 	case enum.SearchPacket: //搜索玩家信息
+		resp = ser.SearchHandler(ctx, req)
 
 	case enum.RankListPactet: //查看积分排行榜
+		resp = ser.RankListHandler(ctx, req)
 
 	case enum.UserCountPacket: //玩家数量
+		resp = ser.UserCountHandler(ctx, req)
 
 	case enum.MatchPacket: //匹配
 

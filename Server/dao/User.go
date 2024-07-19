@@ -59,6 +59,7 @@ func (d *UserDao) Get() (models.User, error) {
 		err = errors.New("参数不全")
 	}
 
+	d.Clear()
 	return data, err
 }
 
@@ -70,8 +71,43 @@ func (d *UserDao) Create(user models.User) error {
 func (d *UserDao) IsHave(username string) (bool, error) {
 	d.WhereName(username)
 	user, err := d.Get()
+	d.Clear()
 	if err != nil || user.Id == 0 {
 		return false, err
 	}
 	return true, nil
+}
+
+func (d *UserDao) Delete() error {
+	var (
+		data   models.User
+		err    error
+		ok     = false
+		dbConn = db.MysqlDB
+	)
+	dbConn = dbConn.Table(data.TableName())
+
+	if d.id > 0 {
+		ok = true
+		dbConn = dbConn.Where("id=?", d.id)
+	}
+
+	if len(d.name) != 0 {
+		ok = true
+		dbConn = dbConn.Where("user_name=?", d.name)
+	}
+
+	if ok {
+		err = dbConn.Delete(&data).Error
+	} else {
+		return errors.New("参数不全")
+	}
+
+	d.Clear()
+	return err
+}
+
+func (d *UserDao) Clear() {
+	d.id = 0
+	d.name = ""
 }
