@@ -36,7 +36,8 @@ func (ser *Server) rankList(ctx context.Context, req *entity.TransfeData) (final
 
 	defer func() {
 		if allErr := recover(); allErr != nil {
-			finalResp.Code = common.ProcessErr
+			finalResp.Code = common.SystemPanicErr
+			finalResp.Msg = common.SystemPanicMsg
 			log.Println(ctx, allErr)
 		}
 	}()

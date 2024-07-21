@@ -1,11 +1,13 @@
 package models
 
-import "github.com/redis/go-redis/v9"
+import (
+	"github.com/redis/go-redis/v9"
+)
 
 var Cache *redis.Client
 
 const (
-	RankListCacheKey = "ranklist"
+	RankListCacheKey = "ranklist" //排行榜，ZSet
 )
 
 func InitRedis() {
@@ -14,4 +16,5 @@ func InitRedis() {
 		Password: "",
 		DB:       0,
 	})
+
 }

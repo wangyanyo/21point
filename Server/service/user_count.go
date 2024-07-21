@@ -28,7 +28,8 @@ func (ser *Server) userCount(ctx context.Context, req *entity.TransfeData) (fina
 
 	defer func() {
 		if allErr := recover(); allErr != nil {
-			finalResp.Code = common.ProcessErr
+			finalResp.Code = common.SystemPanicErr
+			finalResp.Msg = common.SystemPanicMsg
 			log.Println(ctx, allErr)
 		}
 	}()

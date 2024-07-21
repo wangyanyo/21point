@@ -25,13 +25,15 @@ func User() UserDaoInterface {
 }
 
 func (d *UserDao) WhereId(id int64) *UserDao {
-	d.id = id
-	return d
+	clone := d.Clone()
+	clone.id = id
+	return clone
 }
 
 func (d *UserDao) WhereName(name string) *UserDao {
-	d.name = name
-	return d
+	clone := d.Clone()
+	clone.name = name
+	return clone
 }
 
 func (d *UserDao) Get() (models.User, error) {
@@ -110,4 +112,11 @@ func (d *UserDao) Delete() error {
 func (d *UserDao) Clear() {
 	d.id = 0
 	d.name = ""
+}
+
+func (d *UserDao) Clone() *UserDao {
+	return &UserDao{
+		id:   d.id,
+		name: d.name,
+	}
 }

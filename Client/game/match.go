@@ -68,21 +68,13 @@ func Match(c *models.TcpClient) error {
 		if err != nil {
 			return err
 		}
-		res := roomInfo.Data.(int)
-		if flag {
-			if res == 0 {
-				utils.PrintMessage("退出匹配失败，正在进入房间...")
-			} else {
-				utils.PrintMessage("退出匹配成功！")
-				return nil
-			}
-		} else {
-			utils.PrintMessage("匹配成功，正在进入房间...")
-		}
+		utils.PrintMessage("匹配成功，正在进入房间...")
 		c.RoomID = roomInfo.Data.(int)
 		if err := PlayGame(c); err != nil {
+			c.RoomID = 0
 			return err
 		}
+		c.RoomID = 0
 		return nil
 
 	case <-ch:

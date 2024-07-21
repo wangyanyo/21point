@@ -36,7 +36,8 @@ func (ser *Server) search(ctx context.Context, req *entity.TransfeData) (finalRe
 
 	defer func() {
 		if allErr := recover(); allErr != nil {
-			finalResp.Code = common.ProcessErr
+			finalResp.Code = common.SystemPanicErr
+			finalResp.Msg = common.SystemPanicMsg
 			log.Println(ctx, allErr)
 		}
 	}()

@@ -13,12 +13,9 @@ const (
 	UserCountPacket  Command = "UserCount"  //玩家数量
 	MatchPacket      Command = "Match"      //匹配
 	MatchOffPacket   Command = "MatchOff"   //取消匹配
-	InitCardPacket   Command = "InitCard"   //洗牌
 	AskCardsPactet   Command = "AskCards"   //要牌
-	StopCardsPactet  Command = "StopCards"  //停牌
 	GameResultPacket Command = "GameResult" //游戏结果
-	ChatPacket       Command = "Chat"       //聊天包
-	GameSayPacket    Command = "GameSay"    //发起聊天
+	ChatPacket       Command = "Chat"       //聊天
 	ExitRoomPacket   Command = "ExitRoom"   //退出房间
 )
 

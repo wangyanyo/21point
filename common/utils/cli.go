@@ -78,3 +78,10 @@ func GetOpt(msg string, x int) string {
 	}
 	return opt
 }
+
+func Abs(x int) int {
+	if x < 0 {
+		return -x
+	}
+	return x
+}

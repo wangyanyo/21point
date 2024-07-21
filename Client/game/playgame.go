@@ -43,21 +43,31 @@ func exitRoom(c *models.TcpClient) {
 	ral.Ral(c, req)
 }
 
+func askCards(c *models.TcpClient) (string, error) {
+	req := &entity.TransfeData{
+		Cmd:    enum.AskCardsPactet,
+		Token:  c.Token,
+		RoomID: c.RoomID,
+	}
+	cardInfo, err := ral.Ral(c, req)
+	if err != nil {
+		return "", err
+	}
+	return cardInfo.Data.(string), nil
+}
+
 func PlayGame(c *models.TcpClient) error {
 	myCards := []string{}
 	for {
 		if len(myCards) == 0 {
-			req := &entity.TransfeData{
-				Cmd:    enum.InitCardPacket,
-				Token:  c.Token,
-				RoomID: c.RoomID,
+			for i := 1; i <= 2; i++ {
+				card, err := askCards(c)
+				if err != nil {
+					exitRoom(c)
+					return err
+				}
+				myCards = append(myCards, card)
 			}
-			initCardInfo, err := ral.Ral(c, req)
-			if err != nil {
-				exitRoom(c)
-				return err
-			}
-			myCards = initCardInfo.Data.([]string)
 		}
 
 		utils.Cle()
@@ -91,17 +101,11 @@ func PlayGame(c *models.TcpClient) error {
 			fmt.Print(view.PlayGameViewTail)
 			opt := utils.GetOpt("请输入: ", 3)
 			if opt == "0" {
-				req := &entity.TransfeData{
-					Cmd:    enum.AskCardsPactet,
-					Token:  c.Token,
-					RoomID: c.RoomID,
-				}
-				cardInfo, err := ral.Ral(c, req)
+				card, err := askCards(c)
 				if err != nil {
 					exitRoom(c)
 					return err
 				}
-				card := cardInfo.Data.(string)
 				myCards = append(myCards, card)
 				continue
 
