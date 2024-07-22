@@ -1,21 +1,23 @@
 package common
 
 const (
-	StatusSuccess       = 0
-	UserNameEmptyError  = 1
-	PasswordEmptyError  = 2
-	CallDBError         = 3
-	UserExistedError    = 4
-	SystemPanicErr      = 5
-	NotFoundUserError   = 6
-	PasswordWrongError  = 7
-	TokenIsEmptyError   = 8
-	CallRedisError      = 9
-	ReqDataIsEmptyError = 10
-	AskQueueError       = 11
-	MatchOffCode        = 12
-	RoomIDIsEmptyError  = 13
-	RoomWrongError      = 14
+	StatusSuccess          = 0
+	UserNameEmptyError     = 1
+	PasswordEmptyError     = 2
+	CallDBError            = 3
+	UserExistedError       = 4
+	SystemPanicErr         = 5
+	NotFoundUserError      = 6
+	PasswordWrongError     = 7
+	TokenIsEmptyError      = 8
+	CallRedisError         = 9
+	ReqDataIsEmptyError    = 10
+	AskQueueError          = 11
+	MatchOffCode           = 12
+	RoomIDIsEmptyError     = 13
+	RoomWrongError         = 14
+	OtherPlayerTimeOutCode = 15
+	ExitRoomCode           = 16
 )
 
 const (
@@ -30,6 +32,12 @@ const (
 	MatchOffMsg       = "match off succeed"
 	RoomIDIsEmptyMsg  = "roomID is empty"
 	RoomIDIsWrongMsg  = "not found Player in the Room, Please check the roomID"
+	TimeOutMsg        = "you are kick out of the room because TimeOut, score-10"
+	EscapeMsg         = "you escape the game, score-10"
+	ExitMsg           = "you have succeed exit room"
+	OtherTimeOutMsg   = "other player TimeOut, score+10"
+	OtherEscapeMsg    = "other player escape the game, score+10"
+	OtherExitMsg      = "other player quit the room, game over"
 )
 
 var CardItoaMap = map[int]string{

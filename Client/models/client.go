@@ -2,6 +2,8 @@ package models
 
 import (
 	"net"
+
+	"github.com/wangyanyo/21point/common/entity"
 )
 
 type TcpClient struct {
@@ -9,6 +11,8 @@ type TcpClient struct {
 	TcpAddr    *net.TCPAddr
 	Token      string
 	RoomID     int
+	ChatMsg    []*entity.ChatData
+	Count      int
 }
 
 func (c *TcpClient) Send(b []byte) (int, error) {

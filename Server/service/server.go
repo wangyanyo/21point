@@ -60,15 +60,23 @@ func (ser *Server) IsHave(ctx context.Context, username string) (bool, error) {
 
 func (ser *Server) CheckRoom(roomID int, name string) (bool, string) {
 	ser.MatchRWMutex[roomID].RLock()
-	if ser.RoomSet[roomID] == nil || ser.RoomSet[roomID].Flag == false || ser.RoomSet[roomID].Exist(name) {
+	if ser.RoomSet[roomID] == nil || !ser.RoomSet[roomID].Flag || ser.RoomSet[roomID].Exist(name) {
 		_, ok := models.RoomExitMsgMap[name]
 		if ok {
 			msg := models.RoomExitMsgMap[name]
 			delete(models.RoomExitMsgMap, name)
+			ser.MatchRWMutex[roomID].RUnlock()
 			return false, msg
 		} else {
+			ser.MatchRWMutex[roomID].RUnlock()
 			return false, common.RoomIDIsWrongMsg
 		}
 	}
+	ser.MatchRWMutex[roomID].RUnlock()
 	return true, ""
+}
+
+func (ser *Server) DeleteRoom(roomID int) {
+	ser.RoomSet[roomID] = nil
+	ser.RoomIDQueue.Push(roomID)
 }

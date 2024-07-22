@@ -73,7 +73,7 @@ func GetOpt(msg string, x int) string {
 			break
 		}
 		fmt.Printf("\033[1A\r")
-		fmt.Printf("%*c", 50, ' ')
+		fmt.Printf("%*c", 40, ' ')
 		fmt.Printf("\r")
 	}
 	return opt
@@ -84,4 +84,28 @@ func Abs(x int) int {
 		return -x
 	}
 	return x
+}
+
+func CheckGameResult(x int, y int) int {
+	if x > 21 && y > 21 {
+		return 0
+	}
+	if x > 21 {
+		return -1
+	}
+	if y > 21 {
+		return 1
+	}
+	t1, t2 := 21-x, 21-y
+	if t1 < t2 {
+		return 1
+	}
+	if t1 > t2 {
+		return -1
+	}
+	return 0
+}
+
+func SetPos(row int, cls int) {
+	fmt.Printf("\033[%d;%dH", row, cls)
 }

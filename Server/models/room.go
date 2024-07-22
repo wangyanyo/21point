@@ -16,9 +16,10 @@ type Room struct {
 	Point2    int
 	Cards     []int
 	Flag      bool
-	mutex     sync.Mutex
 	TimeFlag1 time.Time
 	TimeFlag2 time.Time
+	mutex     sync.Mutex
+	cnt       int
 }
 
 func (r *Room) Exist(name string) bool {
@@ -34,6 +35,7 @@ func (r *Room) Init() {
 	r.Point2 = 0
 	r.TimeFlag1 = time.Now()
 	r.TimeFlag2 = time.Now()
+	r.cnt = 0
 }
 
 func (r *Room) GetCard() int {
@@ -84,4 +86,13 @@ func (r *Room) SetPoint(name string, point int) {
 		r.Point1 = point
 	}
 	r.Point2 = point
+}
+
+func (r *Room) CallInit() {
+	r.mutex.Lock()
+	r.cnt++
+	if r.cnt == 2 {
+		r.Init()
+	}
+	r.mutex.Unlock()
 }

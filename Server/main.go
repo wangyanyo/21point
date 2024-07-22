@@ -21,5 +21,5 @@ func main() {
 
 	service.InitServer(ctx)
 
-	tcpsrc.Run()
+	tcpsrc.Run(ctx)
 }

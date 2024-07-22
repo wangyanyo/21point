@@ -36,8 +36,7 @@ func Router(ctx context.Context, req *entity.TransfeData, client *models.ClientU
 		resp = ser.MatchHandler(ctx, req)
 
 	case enum.MatchOffPacket: //取消匹配
-		ser.MatchOffHandler(ctx, req)
-		return
+		resp = ser.MatchOffHandler(ctx, req)
 
 	case enum.AskCardsPactet: //要牌
 		resp = ser.AskCardsHandler(ctx, req)
@@ -45,9 +44,12 @@ func Router(ctx context.Context, req *entity.TransfeData, client *models.ClientU
 	case enum.GameResultPacket: //游戏结果
 		resp = ser.GameResultHandler(ctx, req)
 
-	case enum.ChatPacket: //聊天
+	case enum.ChatPacket: //发送聊天
+
+	case enum.PullMessagePacket: //拉模式获取对方聊天
 
 	case enum.ExitRoomPacket: //退出房间
+		resp = ser.ExitRoomHandler(ctx, req)
 
 	}
 

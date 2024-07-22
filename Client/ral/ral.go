@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log"
 	"net"
+	"sync"
 
 	"github.com/wangyanyo/21point/Client/models"
 	"github.com/wangyanyo/21point/common/entity"
@@ -12,6 +13,8 @@ import (
 )
 
 var resv = make([]byte, 1024)
+
+var mutex sync.Mutex
 
 func SendRequest(c *models.TcpClient, req *entity.TransfeData) error {
 	retry := 2
@@ -52,7 +55,7 @@ func CheckPacket(data *entity.TransfeData, req *entity.TransfeData) error {
 		myerror.PrintError(err)
 		return err
 	} else if data.Code != 0 {
-		err := errors.New(string(req.Cmd) + "--RequestError" + data.Msg)
+		err := errors.New(data.Msg)
 		myerror.PrintError(err)
 		return err
 	}
@@ -60,17 +63,22 @@ func CheckPacket(data *entity.TransfeData, req *entity.TransfeData) error {
 }
 
 func Ral(c *models.TcpClient, req *entity.TransfeData) (*entity.TransfeData, error) {
+	mutex.Lock()
 	if err := SendRequest(c, req); err != nil {
 		myerror.PrintError(err)
+		mutex.Unlock()
 		return nil, err
 	}
 	res, err := Read(c)
 	if err != nil {
 		myerror.PrintError(err)
+		mutex.Unlock()
 		return nil, err
 	}
 	if err := CheckPacket(res, req); err != nil {
+		mutex.Unlock()
 		return nil, err
 	}
+	mutex.Unlock()
 	return res, nil
 }

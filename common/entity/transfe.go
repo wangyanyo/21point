@@ -12,8 +12,6 @@ import (
 func init() {
 	gob.Register(User{})
 	gob.Register(ChatData{})
-	gob.Register(ChatSend{})
-	gob.Register(RoomInfo{})
 	gob.Register(UserScoreInfo{})
 }
 
@@ -76,20 +74,8 @@ type User struct {
 
 // 聊天
 type ChatData struct {
-	From string
-	Mag  string
-}
-
-// 聊天Send
-type ChatSend struct {
-	RoomId string
-	Mag    string
-}
-
-// 房间信息
-type RoomInfo struct {
-	Id    int
-	State int // 0: 匹配中  1: 游戏中
+	Flag int
+	Msg  string
 }
 
 // 玩家分数信息

@@ -56,17 +56,18 @@ func (ser *Server) match(ctx context.Context, req *entity.TransfeData) (finalRes
 
 		if utils.Abs(int(myScore)-score) <= 100 {
 			ser.MatchRWMutex[i].Lock()
-			if ser.RoomSet[i].Flag {
+			if ser.MatchSet[i] == nil {
 				ser.MatchRWMutex[i].Unlock()
 				continue
 			}
-			ser.RoomSet[i].Flag = true
 			ser.MatchSet[i] = nil
 			ser.MatchRWMutex[i].Unlock()
+
 			roomID = i
+			ser.RoomSet[roomID].Flag = true
+			ser.RoomSet[roomID].Player2 = req.Token
 			break
 		}
-		//解锁
 	}
 
 	if roomID == 0 {
@@ -87,25 +88,28 @@ func (ser *Server) match(ctx context.Context, req *entity.TransfeData) (finalRes
 		ser.MatchRWMutex[roomID].Unlock()
 
 		for {
-			if ser.MatchOffFlag[req.Token] {
-				ser.MatchRWMutex[roomID].Lock()
-				ser.MatchSet[roomID] = nil
-				ser.RoomSet[roomID] = nil
-				ser.RoomIDQueue.Push(roomID)
-				ser.MatchOffFlag[req.Token] = false
-				ser.MatchRWMutex[roomID].Unlock()
-
-				res.Code = common.MatchOffCode
-				res.Msg = common.MatchOffMsg
-				return &res
-			}
-
 			ser.MatchRWMutex[roomID].RLock()
 			if ser.RoomSet[roomID].Flag {
 				ser.MatchRWMutex[roomID].RUnlock()
 				break
 			}
+			ser.MatchOffFlag[req.Token] = false
 			ser.MatchRWMutex[roomID].RUnlock()
+
+			if ser.MatchOffFlag[req.Token] {
+				ser.MatchRWMutex[roomID].Lock()
+				if ser.MatchSet[roomID] != nil {
+					ser.MatchSet[roomID] = nil
+				}
+				ser.MatchRWMutex[roomID].Unlock()
+				ser.RoomSet[roomID] = nil
+				ser.RoomIDQueue.Push(roomID)
+				ser.MatchOffFlag[req.Token] = false
+
+				res.Code = common.MatchOffCode
+				res.Msg = common.MatchOffMsg
+				return &res
+			}
 
 			time.Sleep(500 * time.Millisecond)
 		}

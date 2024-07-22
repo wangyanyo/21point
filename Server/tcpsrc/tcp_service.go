@@ -14,7 +14,7 @@ type TcpServer struct {
 	Listener *net.TCPListener
 }
 
-func Run() {
+func Run(ctx context.Context) {
 	tcpAddr, err := net.ResolveTCPAddr("tcp", "0.0.0.0:8200")
 	myerror.PanicErr(err)
 
@@ -40,7 +40,6 @@ func Run() {
 		}
 
 		go func(client *models.ClientUser) {
-			ctx := context.Background()
 			resv := make([]byte, 1024)
 			n, err := client.Connection.Read(resv)
 			if err != nil {

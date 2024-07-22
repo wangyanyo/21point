@@ -8,6 +8,7 @@ import (
 	"github.com/wangyanyo/21point/Server/common"
 	"github.com/wangyanyo/21point/Server/models"
 	"github.com/wangyanyo/21point/common/entity"
+	"github.com/wangyanyo/21point/common/utils"
 )
 
 func (ser *Server) GameResultHandler(ctx context.Context, req *entity.TransfeData) *entity.TransfeData {
@@ -50,16 +51,9 @@ func (ser *Server) gameResult(ctx context.Context, req *entity.TransfeData) (fin
 
 	ser.RoomSet[req.RoomID].SetPoint(req.Token, point)
 	for {
-		if ser.RoomSet[req.RoomID].JudgeOtherTimeOut(req.Token) {
-			otherPlayer := ser.RoomSet[req.RoomID].GetOtherPlayer(req.Token)
-			ser.CommonCache.ZIncrBy(ctx, models.RankListCacheKey, 10.0, req.Token)
-			ser.CommonCache.ZIncrBy(ctx, models.RankListCacheKey, -10.0, otherPlayer)
-
-			ser.ExitRoom(req.RoomID)
-		}
-
 		if ser.RoomSet[req.RoomID].GetOtherPoint(req.Token) > 0 {
 			otherPoint := ser.RoomSet[req.RoomID].GetOtherPoint(req.Token)
+			ser.RoomSet[req.RoomID].CallInit()
 			flag := utils.CheckGameResult(point, otherPoint)
 			if flag == 1 {
 				ser.CommonCache.ZIncrBy(ctx, models.RankListCacheKey, 10.0, req.Token)
@@ -70,6 +64,19 @@ func (ser *Server) gameResult(ctx context.Context, req *entity.TransfeData) (fin
 			res.Data = otherPoint
 			return &res
 		}
+
+		if ser.RoomSet[req.RoomID].JudgeOtherTimeOut(req.Token) {
+			otherPlayer := ser.RoomSet[req.RoomID].GetOtherPlayer(req.Token)
+			ser.CommonCache.ZIncrBy(ctx, models.RankListCacheKey, 10.0, req.Token)
+			ser.CommonCache.ZIncrBy(ctx, models.RankListCacheKey, -10.0, otherPlayer)
+			models.RoomExitMsgMap[otherPlayer] = common.TimeOutMsg
+			ser.DeleteRoom(req.RoomID)
+
+			res.Code = common.OtherPlayerTimeOutCode
+			res.Msg = common.OtherTimeOutMsg
+			return &res
+		}
+
 		time.Sleep(500 * time.Millisecond)
 	}
 }
