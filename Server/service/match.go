@@ -66,6 +66,7 @@ func (ser *Server) match(ctx context.Context, req *entity.TransfeData) (finalRes
 			roomID = i
 			ser.RoomSet[roomID].Flag = true
 			ser.RoomSet[roomID].Player2 = req.Token
+			ser.RoomSet[roomID].Init()
 			break
 		}
 	}

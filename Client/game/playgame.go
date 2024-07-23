@@ -16,7 +16,7 @@ import (
 
 func printError(c *models.TcpClient, err error) {
 	c.PrintMutex.Lock()
-	utils.SetPos(12, 1)
+	utils.SetPos(15, 1)
 	myerror.PrintError(err)
 	c.PrintMutex.Unlock()
 }
@@ -52,16 +52,24 @@ func waitResult(c *models.TcpClient, point int) error {
 }
 
 func exitRoom(c *models.TcpClient, flag int) {
+	if c.ExitFlag {
+		c.ExitFlag = true
+		return
+	}
 	req := &entity.TransfeData{
 		Cmd:    enum.ExitRoomPacket,
 		Token:  c.Token,
 		RoomID: c.RoomID,
 		Data:   flag,
 	}
-	ral.Ral(c, req)
+	_, err := ral.Ral(c, req)
+	if err != nil {
+		printError(c, err)
+	}
 	c.RoomID = 0
 	c.Count = 0
 	c.ChatMsg = make([]*entity.ChatData, 0)
+	c.ExitFlag = false
 }
 
 func askCards(c *models.TcpClient) (string, error) {
@@ -77,10 +85,14 @@ func askCards(c *models.TcpClient) (string, error) {
 	return cardInfo.Data.(string), nil
 }
 
-func askContinue() bool {
+func askContinue(c *models.TcpClient, keysEvents <-chan keyboard.KeyEvent) bool {
+	c.PrintMutex.Lock()
+	utils.SetPos(11, 1)
 	fmt.Println("是否继续？")
 	fmt.Println("操作: 0 继续   1 退出")
-	opt := utils.GetOpt("请输入: ", 1)
+	fmt.Print("请输入: ")
+	c.PrintMutex.Unlock()
+	opt := input(c, keysEvents, 13, 9)
 	if opt == "0" {
 		return true
 	} else {
@@ -88,37 +100,13 @@ func askContinue() bool {
 	}
 }
 
-func printChatView(c *models.TcpClient) {
-	utils.SetPos(2, 54)
-	fmt.Print(view.MessageView)
-
-	for i := 1; i <= 30; i++ {
-		utils.SetPos(i, 52)
-		fmt.Print("|")
-	}
-
-	for i, v := range c.ChatMsg {
-		utils.SetPos(i+3, 54)
-		if v.Flag == 1 {
-			fmt.Print("Me: ")
-		} else if v.Flag == 2 {
-			fmt.Print("Other: ")
-		}
-		fmt.Print(v.Msg)
-	}
-
-	utils.SetPos(1, 1)
-}
-
 func addMeesage(c *models.TcpClient, data *entity.ChatData) {
+	c.AddMsgMutex.Lock()
 	c.ChatMsg = append(c.ChatMsg, data)
-	utils.SetPos(len(c.ChatMsg)+2, 54)
-	if data.Flag == 1 {
-		fmt.Print("Me: ")
-	} else if data.Flag == 2 {
-		fmt.Print("Other: ")
+	if len(c.ChatMsg) > 15 {
+		c.ChatMsg = c.ChatMsg[len(c.ChatMsg)-10:]
 	}
-	fmt.Print(data.Msg)
+	c.AddMsgMutex.Unlock()
 }
 
 func chat(c *models.TcpClient, keysEvents <-chan keyboard.KeyEvent) error {
@@ -128,6 +116,9 @@ func chat(c *models.TcpClient, keysEvents <-chan keyboard.KeyEvent) error {
 	c.PrintMutex.Unlock()
 
 	text := input(c, keysEvents, 9, 13)
+	if len(text) == 0 {
+		return nil
+	}
 	addMeesage(c, &entity.ChatData{
 		Flag: 1,
 		Msg:  text,
@@ -139,11 +130,20 @@ func chat(c *models.TcpClient, keysEvents <-chan keyboard.KeyEvent) error {
 		Data:   text,
 	}
 	_, err := ral.Ral(c, req)
-	return err
+	if err != nil {
+		printError(c, err)
+		return err
+	}
+	return nil
 }
 
 func pullMessage(c *models.TcpClient) {
 	for {
+		if c.ExitFlag {
+			c.ExitFlag = false
+			return
+		}
+
 		req := &entity.TransfeData{
 			Cmd:    enum.ChatPacket,
 			Token:  c.Token,
@@ -152,7 +152,9 @@ func pullMessage(c *models.TcpClient) {
 		}
 		resp, err := ral.Ral(c, req)
 		if err != nil {
-
+			printError(c, err)
+			exitRoom(c, 1)
+			return
 		}
 		msgInfo := resp.Data.([]string)
 		for _, v := range msgInfo {
@@ -162,6 +164,9 @@ func pullMessage(c *models.TcpClient) {
 			})
 		}
 		c.Count += len(msgInfo)
+		if len(msgInfo) > 0 {
+			printMessage(c)
+		}
 
 		time.Sleep(1 * time.Second)
 	}
@@ -224,6 +229,7 @@ func printGame(c *models.TcpClient, myCards []string) error {
 func printMessage(c *models.TcpClient) {
 	c.PrintMutex.Lock()
 	flushMessage()
+	c.AddMsgMutex.Lock()
 	for i, v := range c.ChatMsg {
 		utils.SetPos(i+3, 54)
 		if v.Flag == 1 {
@@ -233,6 +239,7 @@ func printMessage(c *models.TcpClient) {
 		}
 		fmt.Print(v.Msg)
 	}
+	c.AddMsgMutex.Lock()
 	c.PrintMutex.Unlock()
 }
 
@@ -296,7 +303,7 @@ func PlayGame(c *models.TcpClient) error {
 	utils.Cle()
 	printHead(c)
 
-	keysEvents, err := keyboard.GetKeys(10)
+	keysEvents, err := keyboard.GetKeys(15)
 	if err != nil {
 		panic(err)
 	}
@@ -308,6 +315,11 @@ func PlayGame(c *models.TcpClient) error {
 
 	go pullMessage(c)
 	for {
+		if c.ExitFlag {
+			c.ExitFlag = false
+			return nil
+		}
+
 		if len(myCards) == 0 {
 			for i := 1; i <= 2; i++ {
 				card, err := askCards(c)
@@ -342,11 +354,15 @@ func PlayGame(c *models.TcpClient) error {
 				}
 				myCards = append(myCards, card)
 				continue
-
 			} else if opt == "1" {
 				stopFlag = true
 			} else if opt == "2" {
-
+				err := chat(c, keysEvents)
+				if err != nil {
+					exitRoom(c, 1)
+					return err
+				}
+				printMessage(c)
 			} else if opt == "3" {
 				exitRoom(c, 2)
 				return nil
@@ -363,7 +379,7 @@ func PlayGame(c *models.TcpClient) error {
 				exitRoom(c, 1)
 				return err
 			}
-			jud := askContinue()
+			jud := askContinue(c, keysEvents)
 			if !jud {
 				exitRoom(c, 1)
 				return nil

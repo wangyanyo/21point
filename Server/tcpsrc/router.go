@@ -45,8 +45,10 @@ func Router(ctx context.Context, req *entity.TransfeData, client *models.ClientU
 		resp = ser.GameResultHandler(ctx, req)
 
 	case enum.ChatPacket: //发送聊天
+		resp = ser.ChatHandler(ctx, req)
 
 	case enum.PullMessagePacket: //拉模式获取对方聊天
+		resp = ser.PullMessageHandler(ctx, req)
 
 	case enum.ExitRoomPacket: //退出房间
 		resp = ser.ExitRoomHandler(ctx, req)

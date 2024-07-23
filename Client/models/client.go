@@ -8,13 +8,15 @@ import (
 )
 
 type TcpClient struct {
-	Connection *net.TCPConn
-	TcpAddr    *net.TCPAddr
-	Token      string
-	RoomID     int
-	ChatMsg    []*entity.ChatData
-	Count      int
-	PrintMutex sync.Mutex //光标只有一个，要有顺序的使用光标打印
+	Connection  *net.TCPConn
+	TcpAddr     *net.TCPAddr
+	Token       string
+	RoomID      int
+	ChatMsg     []*entity.ChatData
+	Count       int
+	PrintMutex  sync.Mutex //光标只有一个，要有顺序的使用光标打印
+	AddMsgMutex sync.Mutex
+	ExitFlag    bool
 }
 
 func (c *TcpClient) Send(b []byte) (int, error) {
