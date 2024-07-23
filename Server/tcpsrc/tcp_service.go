@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 
+	"github.com/panjf2000/ants"
 	"github.com/wangyanyo/21point/Server/models"
 	"github.com/wangyanyo/21point/common/entity"
 	"github.com/wangyanyo/21point/common/myerror"
@@ -23,6 +24,25 @@ func Run(ctx context.Context) {
 
 	defer listener.Close()
 
+	p, _ := ants.NewPoolWithFunc(1000, func(t interface{}) {
+		client := t.(*models.ClientUser)
+		resv := make([]byte, 1024)
+		n, err := client.Connection.Read(resv)
+		if err != nil {
+			log.Println("[接收数据失败]", client.Connection.RemoteAddr().String(), client.Connection)
+			return
+		}
+
+		if n > 0 && n < 1025 {
+			Router(ctx, entity.TransfeDataDecoder(resv), client)
+		} else {
+			log.Println("[数据错误]", client.Connection.RemoteAddr().String(), client.Connection)
+			return
+		}
+	})
+
+	defer p.Release()
+
 	tcpServer := TcpServer{
 		Listener: listener,
 	}
@@ -39,20 +59,6 @@ func Run(ctx context.Context) {
 			Connection: conn,
 		}
 
-		go func(client *models.ClientUser) {
-			resv := make([]byte, 1024)
-			n, err := client.Connection.Read(resv)
-			if err != nil {
-				log.Println("[接收数据失败]", conn.RemoteAddr().String(), conn)
-				return
-			}
-
-			if n > 0 && n < 1025 {
-				Router(ctx, entity.TransfeDataDecoder(resv), client)
-			} else {
-				log.Println("[数据错误]", conn.RemoteAddr().String(), conn)
-				return
-			}
-		}(clientUser)
+		p.Invoke(clientUser)
 	}
 }
