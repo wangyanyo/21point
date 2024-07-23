@@ -8,7 +8,7 @@ import (
 
 func PrintError(err error) {
 	log.Println(err)
-	fmt.Println(err)
+	fmt.Println(err.Error())
 	time.Sleep(1 * time.Second)
 }
 

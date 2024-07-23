@@ -2,6 +2,7 @@ package models
 
 import (
 	"net"
+	"sync"
 
 	"github.com/wangyanyo/21point/common/entity"
 )
@@ -13,6 +14,7 @@ type TcpClient struct {
 	RoomID     int
 	ChatMsg    []*entity.ChatData
 	Count      int
+	PrintMutex sync.Mutex //光标只有一个，要有顺序的使用光标打印
 }
 
 func (c *TcpClient) Send(b []byte) (int, error) {

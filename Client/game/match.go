@@ -9,6 +9,7 @@ import (
 	"github.com/wangyanyo/21point/Client/view"
 	"github.com/wangyanyo/21point/common/entity"
 	"github.com/wangyanyo/21point/common/enum"
+	"github.com/wangyanyo/21point/common/myerror"
 	"github.com/wangyanyo/21point/common/utils"
 )
 
@@ -66,6 +67,7 @@ func Match(c *models.TcpClient) error {
 		}
 		err := ral.CheckPacket(roomInfo, req)
 		if err != nil {
+			myerror.PrintError(err)
 			return err
 		}
 		utils.PrintMessage("匹配成功，正在进入房间...")

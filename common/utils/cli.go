@@ -8,8 +8,10 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"regexp"
 	"time"
 
+	"github.com/mattn/go-runewidth"
 	"github.com/wangyanyo/21point/common/enum"
 )
 
@@ -108,4 +110,14 @@ func CheckGameResult(x int, y int) int {
 
 func SetPos(row int, cls int) {
 	fmt.Printf("\033[%d;%dH", row, cls)
+}
+
+var stripAnsiEscapeRegexp = regexp.MustCompile(`(\x9B|\x1B\[)[0-?]*[ -/]*[@-~]`)
+
+func stripAnsiEscape(s string) string {
+	return stripAnsiEscapeRegexp.ReplaceAllString(s, "")
+}
+
+func RealLength(s string) int {
+	return runewidth.StringWidth(stripAnsiEscape(s))
 }

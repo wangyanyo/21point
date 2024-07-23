@@ -11,6 +11,7 @@ import (
 	"github.com/wangyanyo/21point/Client/view"
 	"github.com/wangyanyo/21point/common/entity"
 	"github.com/wangyanyo/21point/common/enum"
+	"github.com/wangyanyo/21point/common/myerror"
 	"github.com/wangyanyo/21point/common/utils"
 )
 
@@ -37,6 +38,7 @@ func Login(c *models.TcpClient) error {
 	}
 	loginInfo, err := ral.Ral(c, req)
 	if err != nil {
+		myerror.PrintError(err)
 		return err
 	}
 	utils.PrintMessage("登录成功！")

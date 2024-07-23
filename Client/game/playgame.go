@@ -1,18 +1,25 @@
 package game
 
 import (
-	"bufio"
 	"fmt"
-	"os"
 	"time"
 
+	"github.com/eiannone/keyboard"
 	"github.com/wangyanyo/21point/Client/models"
 	"github.com/wangyanyo/21point/Client/ral"
 	"github.com/wangyanyo/21point/Client/view"
 	"github.com/wangyanyo/21point/common/entity"
 	"github.com/wangyanyo/21point/common/enum"
+	"github.com/wangyanyo/21point/common/myerror"
 	"github.com/wangyanyo/21point/common/utils"
 )
+
+func printError(c *models.TcpClient, err error) {
+	c.PrintMutex.Lock()
+	utils.SetPos(12, 1)
+	myerror.PrintError(err)
+	c.PrintMutex.Unlock()
+}
 
 func waitResult(c *models.TcpClient, point int) error {
 	req := &entity.TransfeData{
@@ -23,10 +30,14 @@ func waitResult(c *models.TcpClient, point int) error {
 	}
 	resultInfo, err := ral.Ral(c, req)
 	if err != nil {
+		printError(c, err)
 		return err
 	}
 	otherPoint := resultInfo.Data.(int)
 	flag := utils.CheckGameResult(point, otherPoint)
+
+	c.PrintMutex.Lock()
+	utils.SetPos(10, 1)
 	if flag == -1 {
 		fmt.Printf("\033[91m你输了, 对方点数: %d, Score-10\033[0m", otherPoint)
 	} else if flag == 0 {
@@ -34,6 +45,8 @@ func waitResult(c *models.TcpClient, point int) error {
 	} else {
 		fmt.Printf("\033[92m你赢了, 对方点数: %d, Score+10\033[0m", otherPoint)
 	}
+	c.PrintMutex.Unlock()
+
 	time.Sleep(1500 * time.Millisecond)
 	return nil
 }
@@ -108,11 +121,13 @@ func addMeesage(c *models.TcpClient, data *entity.ChatData) {
 	fmt.Print(data.Msg)
 }
 
-func chat(c *models.TcpClient) error {
+func chat(c *models.TcpClient, keysEvents <-chan keyboard.KeyEvent) error {
+	c.PrintMutex.Lock()
+	utils.SetPos(9, 1)
 	fmt.Print("请输入消息: ")
-	scanner := bufio.NewScanner(os.Stdin)
-	scanner.Scan()
-	text := scanner.Text()
+	c.PrintMutex.Unlock()
+
+	text := input(c, keysEvents, 9, 13)
 	addMeesage(c, &entity.ChatData{
 		Flag: 1,
 		Msg:  text,
@@ -152,7 +167,8 @@ func pullMessage(c *models.TcpClient) {
 	}
 }
 
-func printHead() {
+func printHead(c *models.TcpClient) {
+	c.PrintMutex.Lock()
 	fmt.Print(view.PlayGameViewHead)
 	utils.SetPos(2, 54)
 	fmt.Print(view.MessageView)
@@ -160,6 +176,7 @@ func printHead() {
 		utils.SetPos(i, 52)
 		fmt.Print("|")
 	}
+	c.PrintMutex.Unlock()
 }
 
 func flushGame() {
@@ -179,8 +196,9 @@ func flushMessage() {
 }
 
 func printGame(c *models.TcpClient, myCards []string) error {
+	c.PrintMutex.Lock()
 	flushGame()
-	fmt.Print("你的分数：")
+	fmt.Print("你当前的分数是: ")
 	req := &entity.TransfeData{
 		Cmd:    enum.GetScorePacket,
 		Token:  c.Token,
@@ -188,19 +206,24 @@ func printGame(c *models.TcpClient, myCards []string) error {
 	}
 	scoreInfo, err := ral.Ral(c, req)
 	if err != nil {
+		myerror.PrintError(err)
+		c.PrintMutex.Unlock()
 		return err
 	}
 	fmt.Println(scoreInfo.Data.(int))
 
-	fmt.Print("你的牌：")
+	fmt.Print("你的牌: ")
 	for _, card := range myCards {
 		fmt.Printf("%s  ", card)
 	}
-	fmt.Printf("\n你的点数：%d\n\n", utils.CalcPoint(myCards))
+	fmt.Printf("\n点数: %d\n\n", utils.CalcPoint(myCards))
+	c.PrintMutex.Unlock()
 	return nil
 }
 
-func PrintMessage(c *models.TcpClient) {
+func printMessage(c *models.TcpClient) {
+	c.PrintMutex.Lock()
+	flushMessage()
 	for i, v := range c.ChatMsg {
 		utils.SetPos(i+3, 54)
 		if v.Flag == 1 {
@@ -210,14 +233,80 @@ func PrintMessage(c *models.TcpClient) {
 		}
 		fmt.Print(v.Msg)
 	}
+	c.PrintMutex.Unlock()
+}
 
-	utils.SetPos(1, 1)
+func input(c *models.TcpClient, keysEvents <-chan keyboard.KeyEvent, row int, cls int) string {
+	var str []rune
+	for {
+		event := <-keysEvents
+		c.PrintMutex.Lock()
+
+		if event.Key == keyboard.KeySpace {
+			utils.SetPos(row, cls)
+			fmt.Print(" ")
+			cls += utils.RealLength(" ")
+			str = append(str, ' ')
+		} else if event.Key == keyboard.KeyBackspace {
+			if cls > 1 {
+				t := str[len(str)-1]
+				str = str[:len(str)-1]
+				len := utils.RealLength(string(t))
+				cls -= len
+				utils.SetPos(row, cls)
+				fmt.Printf("%*c", len, ' ')
+				utils.SetPos(row, cls)
+			}
+		} else if event.Key == keyboard.KeyEnter {
+			fmt.Printf("\n")
+			break
+		} else {
+			utils.SetPos(row, cls)
+			c := string(event.Rune)
+			fmt.Print(c)
+			cls += utils.RealLength(c)
+			str = append(str, event.Rune)
+		}
+
+		c.PrintMutex.Unlock()
+	}
+	return string(str)
+}
+
+func printTail(c *models.TcpClient) {
+	c.PrintMutex.Lock()
+
+	utils.SetPos(7, 1)
+	fmt.Print(view.PlayGameViewTail)
+	fmt.Print("请输入: ")
+
+	c.PrintMutex.Unlock()
+}
+
+func printStopCard(c *models.TcpClient) {
+	c.PrintMutex.Lock()
+
+	utils.SetPos(9, 1)
+	fmt.Println("停牌")
+
+	c.PrintMutex.Unlock()
 }
 
 func PlayGame(c *models.TcpClient) error {
-	go pullMessage(c)
+	utils.Cle()
+	printHead(c)
+
+	keysEvents, err := keyboard.GetKeys(10)
+	if err != nil {
+		panic(err)
+	}
+	defer func() {
+		_ = keyboard.Close()
+	}()
 
 	myCards := []string{}
+
+	go pullMessage(c)
 	for {
 		if len(myCards) == 0 {
 			for i := 1; i <= 2; i++ {
@@ -230,28 +319,12 @@ func PlayGame(c *models.TcpClient) error {
 			}
 		}
 
-		utils.Cle()
-		printChatView(c)
-		fmt.Print(view.PlayGameViewHead)
-
-		fmt.Print("你的分数：")
-		req := &entity.TransfeData{
-			Cmd:    enum.GetScorePacket,
-			Token:  c.Token,
-			RoomID: c.RoomID,
-		}
-		scoreInfo, err := ral.Ral(c, req)
+		err := printGame(c, myCards)
 		if err != nil {
 			exitRoom(c, 1)
 			return err
 		}
-		fmt.Println(scoreInfo.Data.(int))
-
-		fmt.Print("你的牌：")
-		for _, card := range myCards {
-			fmt.Printf("%s  ", card)
-		}
-		fmt.Printf("\n你的点数：%d\n\n", utils.CalcPoint(myCards))
+		printMessage(c)
 
 		stopFlag := false
 		if point := utils.CalcPoint(myCards); point >= 21 {
@@ -259,8 +332,8 @@ func PlayGame(c *models.TcpClient) error {
 		}
 
 		if !stopFlag {
-			fmt.Print(view.PlayGameViewTail)
-			opt := utils.GetOpt("请输入: ", 3)
+			printTail(c)
+			opt := input(c, keysEvents, 8, 9)
 			if opt == "0" {
 				card, err := askCards(c)
 				if err != nil {
@@ -272,25 +345,18 @@ func PlayGame(c *models.TcpClient) error {
 
 			} else if opt == "1" {
 				stopFlag = true
-
 			} else if opt == "2" {
-				err := chat(c)
-				if err != nil {
-					exitRoom(c, 1)
-					return err
-				}
-				if len(c.ChatMsg) > 20 {
-					flushMessage(c)
-				}
 
 			} else if opt == "3" {
 				exitRoom(c, 2)
 				return nil
+			} else {
+				continue
 			}
 		}
 
 		if stopFlag {
-			fmt.Println("停牌")
+			printStopCard(c)
 			point := utils.CalcPoint(myCards)
 			err := waitResult(c, point)
 			if err != nil {

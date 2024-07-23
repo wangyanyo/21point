@@ -8,6 +8,7 @@ import (
 	"github.com/wangyanyo/21point/Client/view"
 	"github.com/wangyanyo/21point/common/entity"
 	"github.com/wangyanyo/21point/common/enum"
+	"github.com/wangyanyo/21point/common/myerror"
 	"github.com/wangyanyo/21point/common/utils"
 )
 
@@ -23,6 +24,7 @@ func Game(c *models.TcpClient) error {
 		}
 		scoreInfo, err := ral.Ral(c, req)
 		if err != nil {
+			myerror.PrintError(err)
 			continue
 		}
 

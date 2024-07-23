@@ -52,11 +52,9 @@ func CheckPacket(data *entity.TransfeData, req *entity.TransfeData) error {
 	log.Println(string(req.Cmd), data)
 	if data.Cmd != req.Cmd {
 		err := errors.New(string(req.Cmd) + "--PacketError")
-		myerror.PrintError(err)
 		return err
 	} else if data.Code != 0 {
 		err := errors.New(data.Msg)
-		myerror.PrintError(err)
 		return err
 	}
 	return nil
